@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.ui.CheckBox;
 
 import edu.ucdavis.cs.cfgproject.shared.Taxon;
 
@@ -12,9 +13,13 @@ import edu.ucdavis.cs.cfgproject.shared.Taxon;
 @RemoteServiceRelativePath("keyGeneration")
 public interface KeyGenerationService extends RemoteService{
 	
-	List<Taxon> retrieveTaxa(List<Taxon> taxa, List<String> characters);
+	List<Taxon> retrieveCSV(List<Taxon> taxa);
 	
-	HashMap<String, String> retrieveCharactersAndIg(List<Taxon> taxa, List<String> characters);
+	List<Taxon> retrieveTaxa(List<Taxon> taxa);
 	
-	HashMap<String, List<Taxon>> retreieveStatesAndSpecies(List<Taxon> taxa, List<String> characters, String character);
+	HashMap<String, String> retrieveCharactersAndIg(List<Taxon> taxa);
+	
+	HashMap<String, List<Taxon>> retrieveStatesAndSpecies(List<Taxon> taxa, String character);
+	
+	List<Taxon> retrieveTaxaByCheckBoxes(List<Taxon> allTaxa, HashMap<String, HashMap<String, CheckBox>> characterStateCheckBoxMap);
 }

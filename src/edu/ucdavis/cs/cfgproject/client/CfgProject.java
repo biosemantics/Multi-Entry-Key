@@ -3,6 +3,7 @@ package edu.ucdavis.cs.cfgproject.client;
 import java.io.*;
 import java.util.*;
 
+import edu.ucdavis.cs.cfgproject.shared.State;
 import edu.ucdavis.cs.cfgproject.shared.TaxonManager;
 import edu.ucdavis.cs.cfgproject.shared.Taxon;
 import au.com.bytecode.opencsv.*;
@@ -23,6 +24,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -47,55 +49,107 @@ public class CfgProject implements EntryPoint {
 	
 	private HorizontalPanel mainPanel = new HorizontalPanel(); 
 	private VerticalPanel westPanel = new VerticalPanel();
-	private VerticalPanel centerPanel = new VerticalPanel();
 	private VerticalPanel eastPanel = new VerticalPanel();
 	private KeyGenerationServiceAsync KeyGenerationSvc = GWT.create(KeyGenerationService.class);
 	CellTable<String> taxaTable = new CellTable<String>();
 	CellTable<HashMap<String, String>> characterTable = new CellTable<HashMap<String, String>>();
 	CellTable<HashMap<String, String>> stateTable = new CellTable<HashMap<String, String>>();
+	private VerticalPanel igCharStateCbPanel = new VerticalPanel();
 	private List<Taxon> taxaPool = new LinkedList<Taxon>();
-	private List<String> charactersPool = new LinkedList<String>();
+//	private List<String> charactersPool = new LinkedList<String>();
 	
 	/**
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
 				
+//		// test checkboxes
+//		// Make a new check box, and select it by default.
+//	      CheckBox checkBox1 = new CheckBox("Check Me123!");
+//	      CheckBox checkBox2 = new CheckBox("Check Me456!");
+//	      
+//
+//	      // set check box as selected
+//	      checkBox1.setValue(true);
+//
+//	      //disable a checkbox
+//	      checkBox2.setEnabled(false);
+//
+//	      checkBox1.addClickHandler(new ClickHandler() {
+//	    	  @Override
+//	    	  public void onClick(ClickEvent event) {
+//	    		  CheckBox checkBox = (CheckBox)event.getSource();
+////	    		  Window.alert("CheckBox is " + (checkBox.getValue() ? "" : "not") + " checked");
+//	    		  Window.alert(""+checkBox.getText());
+//	         }
+//	      });
+//
+//
+//	      // Add checkboxes to the root panel.
+//	      VerticalPanel panel = new VerticalPanel();
+//	      panel.setSpacing(10);            
+//	      panel.add(checkBox1);
+//	      panel.add(checkBox2);
+		
+		
+		
 		/*
-		 * Start here refresh the remaining taxa
+		 * Start here to read taxa csv file
 		 */
-		updateTaxa(taxaPool, charactersPool);
-	
+		readTaxa(taxaPool);	
 		
 		// add stuff to west panel
-		westPanel.add(new Label("You selected taxa: "));
-		taxaTable.setPageSize(200);
-		westPanel.add(taxaTable);
-		
-		// add stuff to center panel
-		centerPanel.add(new Label("The avaiable characters and IGs: "));
-		characterTable.setPageSize(200);
-		centerPanel.add(characterTable);
-		
-	
+		westPanel.add(new Label("Input files: "));
+		westPanel.add(new Label("Characters: "));
+//		characterTable.setPageSize(200);
+//		westPanel.add(characterTable);
+//		westPanel.add(new Label("States: "));
+//		stateTable.setPageSize(200);
+//		westPanel.add(stateTable);
+		westPanel.add(igCharStateCbPanel);
+				
 		// add stuff to east panel;
-		eastPanel.add(new Label("The states and the taxa: "));
-		stateTable.setPageSize(200);
-		eastPanel.add(stateTable);
-		
+		eastPanel.add(new Label("Task names: "));
+		eastPanel.add(new Label("Remaining taxa: "));
+		taxaTable.setPageSize(200);
+		eastPanel.add(taxaTable);
+//		eastPanel.add(panel);
+				
 		// add three big panels to main panel
 		mainPanel.add(westPanel);
-		mainPanel.add(centerPanel);
 		mainPanel.add(eastPanel);
 		
 		// associate the main panel with the HTML host page.  
 		RootPanel.get("cfgproject").add(mainPanel);
 		
+	}
+
+
+	public void readTaxa(List<Taxon> taxa) {
+		/*
+		 * RPC service that retrieve taxa names
+		 */
+		// initialize the service proxy
+		if (KeyGenerationSvc == null) {
+			KeyGenerationSvc = GWT.create(KeyGenerationService.class);
+		}
+		
+		// set up the callback object
+		AsyncCallback<List<Taxon>> readTaxaCallback = new AsyncCallback<List<Taxon>>() {
+			public void onFailure(Throwable caught) {
+			}	
+			public void onSuccess(List<Taxon> allTaxa) {
+				// set all taxa
+				updateTaxa(allTaxa, allTaxa);								
+			}
+		};
+		// Make the call to read matrix service
+		KeyGenerationSvc.retrieveCSV(taxa, readTaxaCallback);
 		
 	}
 
 
-	public void updateTaxa(List<Taxon> taxa, final List<String> characters) {
+	public void updateTaxa(final List<Taxon> allTaxa, List<Taxon> taxa) {
 		
 		/*
 		 * RPC service that retrieve taxa names
@@ -104,7 +158,8 @@ public class CfgProject implements EntryPoint {
 		if (KeyGenerationSvc == null) {
 			KeyGenerationSvc = GWT.create(KeyGenerationService.class);
 		}
-//		KeyGenerationSvc = GWT.create(KeyGenerationService.class);
+		
+		final HashMap<String, HashMap<String, CheckBox>> characterStateCheckBoxMap = new HashMap<String, HashMap<String, CheckBox>>(); 
 		
 		// set up the callback object
 		AsyncCallback<List<Taxon>> updateTaxaCallback = new AsyncCallback<List<Taxon>>() {
@@ -112,18 +167,83 @@ public class CfgProject implements EntryPoint {
 			}	
 			public void onSuccess(List<Taxon> remainingTaxa) {
 				// set all remaining taxa
-				setTaxaTable(remainingTaxa, characters, taxaTable);
+				setTaxaTable(allTaxa, remainingTaxa, characterStateCheckBoxMap, taxaTable);
 										
 			}
 		};
-		// Make the call to read matrix service
-		KeyGenerationSvc.retrieveTaxa(taxa, characters, updateTaxaCallback);
+		// Make the call to get retrieve taxa
+		KeyGenerationSvc.retrieveTaxa(taxa, updateTaxaCallback);
 		
 	}
 	
-	public void updateCharactersAndIg (List<Taxon> taxa, final List<String> characters) {
+	public void updateCharactersAndIgAndStates (final List<Taxon> allTaxa, List<Taxon> taxa) {
 		
 		final List<Taxon> remainingTaxa = taxa;
+		
+		// fancy data structure HashMap<Character, HashMap<State, CheckBox>>
+		final HashMap<String, HashMap<String, CheckBox>> characterStateCheckBoxMap = new HashMap<String, HashMap<String, CheckBox>>();
+				
+		// get the list of all characters
+		Taxon firstTaxon = new Taxon();
+		firstTaxon = allTaxa.get(0);
+		List<String> charactersList = new ArrayList<>(firstTaxon.getAllCharacters());		
+		
+		// initialize fancy data structure
+		for (String character : charactersList) {
+			
+			// for each character, find all states of it
+			ArrayList<String> allStates = new ArrayList<>();
+			for (Taxon taxon : allTaxa) {
+				State statesOfTaxon = taxon.getAllStatesByCharacter(character);
+				String[] stateValues = statesOfTaxon.getValues();
+				for (String stateValue : stateValues) {
+					allStates.add(stateValue);
+				}
+			}
+			HashSet<String> tmpHs = new HashSet<>();
+			tmpHs.addAll(allStates);
+			allStates.clear();
+			allStates.addAll(tmpHs);			
+			
+			// for each state of this character
+			for (String stateValue : allStates) {
+				// create a checkbox
+				CheckBox cb = new CheckBox(stateValue);
+				
+				// update the characterStateCheckBoxMap
+				if (characterStateCheckBoxMap.get(character) != null) {
+					characterStateCheckBoxMap.get(character).put(stateValue, cb);
+				} else {
+					HashMap<String, CheckBox> tmpInner = new HashMap<String, CheckBox>();
+					tmpInner.put(stateValue, cb);
+					characterStateCheckBoxMap.put(character, tmpInner);
+				}	
+			}
+		}
+		
+		updateNewIg(allTaxa, remainingTaxa, characterStateCheckBoxMap);
+		
+		
+//		// issue RPC to get character-ig pair
+//		AsyncCallback<HashMap<String, String>> updateCharactersCallback = new AsyncCallback<HashMap<String, String>>() {
+//
+//			@Override
+//			public void onFailure(Throwable caught) {
+//			}
+//
+//			@Override
+//			public void onSuccess(HashMap<String, String> result) {
+//				setCharacterAngIgCheckboxTable(allTaxa, remainingTaxa, result, characterStateCheckBoxMap, igCharStateCbPanel);
+//				
+//			}
+//		};
+//		KeyGenerationSvc.retrieveCharactersAndIg(remainingTaxa,updateCharactersCallback);
+	}
+
+
+
+	public void updateNewIg(final List<Taxon> allTaxa, final List<Taxon> remainingTaxa, final HashMap<String, HashMap<String, CheckBox>> characterStateCheckBoxMap) {
+		// issue RPC to get character-ig pair
 		AsyncCallback<HashMap<String, String>> updateCharactersCallback = new AsyncCallback<HashMap<String, String>>() {
 
 			@Override
@@ -132,14 +252,157 @@ public class CfgProject implements EntryPoint {
 
 			@Override
 			public void onSuccess(HashMap<String, String> result) {
-				setCharacterAngIgTable(remainingTaxa, characters, result, characterTable);
+				setCharacterAngIgCheckboxTable(allTaxa, remainingTaxa, result, characterStateCheckBoxMap, igCharStateCbPanel);
 				
 			}
 		};
-		KeyGenerationSvc.retrieveCharactersAndIg(remainingTaxa,characters,updateCharactersCallback);
+		KeyGenerationSvc.retrieveCharactersAndIg(remainingTaxa,updateCharactersCallback);
+		
+		
 	}
+
+
+	public void setCharacterAngIgCheckboxTable(final List<Taxon> allTaxa, List<Taxon> remainingTaxa, HashMap<String, String> result, final HashMap<String, HashMap<String, CheckBox>> characterStateCheckBoxMap, VerticalPanel igCharStateCbPanel) {
+		
+		// reset the igCharStateCbPanel
+		if (igCharStateCbPanel.getWidgetCount() != 0){
+			igCharStateCbPanel.clear();
+		}
+		
+		// iterate through the fancy data structure
+		for (Map.Entry<String, HashMap<String, CheckBox>> entry : characterStateCheckBoxMap.entrySet()) {
+			String character = entry.getKey();							//key
+			HashMap<String, CheckBox> stateCbMap = entry.getValue();	//value
+			String ig = result.get(character);
+			Label igLabel = new Label(ig);
+			Label characterLabel = new Label(character);
+			
+			// for each entry create a HorizontalPanel
+			HorizontalPanel entryPanel = new HorizontalPanel();
+			entryPanel.setSpacing(10);
+			entryPanel.add(igLabel);
+			entryPanel.add(characterLabel);
+			
+			for (Map.Entry<String, CheckBox> innerEntry : stateCbMap.entrySet()) {
+//				String state = innerEntry.getKey();
+				CheckBox cb = innerEntry.getValue();
+				
+				// add click handler for checkbox
+				cb.addClickHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+						// iterate all checkboxes to get updated taxa
+						updateTaxaByCheckBoxes(allTaxa, characterStateCheckBoxMap);
+						
+					}
+					
+				});
+				
+				entryPanel.add(cb);
+			}
+			
+			igCharStateCbPanel.add(entryPanel);
+			
+		}
+		
+		
+		
+		
+	}
+
+
+	public void updateTaxaByCheckBoxes(final List<Taxon> allTaxa, HashMap<String, HashMap<String, CheckBox>> characterStateCheckBoxMap) {
+		
+
+//		// issue a RPC to update taxa Table
+//		AsyncCallback<List<Taxon>> updateTaxaByCheckBoxesCallback = new AsyncCallback<List<Taxon>>() {
+//			public void onFailure(Throwable caught) {
+//				System.out.println("" + caught.getMessage());
+//			}	
+//			public void onSuccess(List<Taxon> remainingTaxa) {
+//				// set all remaining taxa
+//				setTaxaTable(allTaxa, remainingTaxa, taxaTable);
+//				
+//										
+//			}
+//		};
+//		// Make the call to get retrieve taxa
+//		KeyGenerationSvc.retrieveTaxaByCheckBoxes(allTaxa, characterStateCheckBoxMap, updateTaxaByCheckBoxesCallback);
+		
+		
+		TaxonManager tMgr = new TaxonManager(allTaxa);
+		
+		List<Taxon> deletedTaxa = new LinkedList<Taxon>();
+		List<Taxon> remainingTaxa = new LinkedList<Taxon>();
+		
+		
+		// iterate through the fancy data structure
+		for (Map.Entry<String, HashMap<String, CheckBox>> entry : characterStateCheckBoxMap.entrySet()) {
+			String character = entry.getKey();							//key
+			HashMap<String, CheckBox> stateCbMap = entry.getValue();	//value
+			
+			// for each character, create HashMap statesToSpecies
+			HashMap<String, List<Taxon>> statesToSpecies = new HashMap<String, List<Taxon>>();
+			statesToSpecies = tMgr.createStatesToSpecies(character);
+			List<Taxon> taxonList = new LinkedList<Taxon>();
+			
+			// By this character go through every state
+			for (Map.Entry<String, CheckBox> innerEntry : stateCbMap.entrySet()) {
+				String state = innerEntry.getKey();						//inner key
+				CheckBox cb = innerEntry.getValue();					//inner value
+				
+				//if cb is checked, find all species that are in this state
+				if (cb.getValue()) {
+					List<Taxon> tmpTaxa = statesToSpecies.get(state);
+					
+					for (Taxon taxon : tmpTaxa) {
+						taxonList.add(taxon);
+					}
+				}
+				
+			}			
+			
+			HashSet<Taxon> tmpHs = new HashSet<Taxon>();
+			tmpHs.addAll(taxonList);
+			taxonList.clear();
+			taxonList.addAll(tmpHs);
+			
+						
+			// if the taxon is not in taxonList, add it to deletedTaxa
+			if (taxonList.size() != 0) {
+				for (Taxon taxon : allTaxa) {
+					if (taxonList.contains(taxon) == false) {
+						deletedTaxa.add(taxon);
+					}
+				}
+			}
+			
+			
+		}
+				
+		HashSet<Taxon> tmpHs = new HashSet<Taxon>();
+		tmpHs.addAll(deletedTaxa);
+		deletedTaxa.clear();
+		deletedTaxa.addAll(tmpHs);
+		
+		
+		// update remainingTaxa
+		for (Taxon taxon : allTaxa) {
+			if (deletedTaxa.contains(taxon) == false) {
+				remainingTaxa.add(taxon);
+			}
+		}
+		
+		
+		setTaxaTable(allTaxa, remainingTaxa, characterStateCheckBoxMap, taxaTable);
+		
 	
-	public void updateStates (List<Taxon> taxa, final List<String> remainingCharacters, String character) {
+		
+	}
+
+
+	public void updateStates (List<Taxon> taxa, String character) {
 		final List<Taxon> remainingTaxa = taxa;
 		AsyncCallback<HashMap<String, List<Taxon>>> updateStatesCallback = new AsyncCallback<HashMap<String, List<Taxon>>>() {
 
@@ -149,11 +412,11 @@ public class CfgProject implements EntryPoint {
 
 			@Override
 			public void onSuccess(HashMap<String, List<Taxon>> result) {
-				setStatesTable(remainingTaxa, remainingCharacters, result, stateTable);
+				setStatesTable(remainingTaxa, result, stateTable);
 			}
 			
 		};
-		KeyGenerationSvc.retreieveStatesAndSpecies(remainingTaxa, remainingCharacters, character, updateStatesCallback);
+		KeyGenerationSvc.retrieveStatesAndSpecies(remainingTaxa, character, updateStatesCallback);
 		
 	}
 	
@@ -163,7 +426,7 @@ public class CfgProject implements EntryPoint {
 	/*
 	 * set all remaining taxa
 	 */
-	public void setTaxaTable(List<Taxon> taxa, List<String> characters, CellTable<String> taxaTable) {
+	public void setTaxaTable(List<Taxon> allTaxa, List<Taxon> taxa, HashMap<String, HashMap<String, CheckBox>> characterStateCheckBoxMap, CellTable<String> taxaTable) {
 		
 		// clear the table first
 		while (taxaTable.getColumnCount() !=0 ) {
@@ -218,14 +481,20 @@ public class CfgProject implements EntryPoint {
 	    taxaTable.getColumnSortList().push(nameColumn);
 	    
 		
-	    // issue another RPC to get characters and information gain
-		updateCharactersAndIg(taxa, characters);
+	    // issue another RPC to get characters and states and information gain
+	    if (characterStateCheckBoxMap.isEmpty()) {
+	    	updateCharactersAndIgAndStates(allTaxa, taxa);
+	    } else {
+	    	updateNewIg(allTaxa, taxa, characterStateCheckBoxMap);
+	    }
+	    
+		
 	}	
 	
 	/*
 	 * set all remaining states
 	 */
-	public void setStatesTable(final List<Taxon> remainingTaxa, final List<String> remainingCharacters, final HashMap<String, List<Taxon>> result, CellTable<HashMap<String, String>> stateTable) {
+	public void setStatesTable(final List<Taxon> remainingTaxa, final HashMap<String, List<Taxon>> result, CellTable<HashMap<String, String>> stateTable) {
 		
 		// clear the table first
 		while (stateTable.getColumnCount() !=0 ) {
@@ -303,7 +572,7 @@ public class CfgProject implements EntryPoint {
 						String key = entry.getKey();
 						List<Taxon> newTaxa = entry.getValue();
 						if (key.equals(stateName)) {
-							updateTaxa(newTaxa, remainingCharacters);
+							updateTaxa(newTaxa, newTaxa);
 							break;
 						}
 
@@ -317,7 +586,7 @@ public class CfgProject implements EntryPoint {
 		
 	}
 	
-	public void setCharacterAngIgTable(final List<Taxon> remainingTaxa, final List<String> characters, HashMap<String, String> result, CellTable<HashMap<String, String>> characterTable) {
+	public void setCharacterAngIgTable(final List<Taxon> remainingTaxa, HashMap<String, String> result, CellTable<HashMap<String, String>> characterTable) {
 		
 		// clear the table first
 		while (characterTable.getColumnCount() !=0 ) {
@@ -325,8 +594,8 @@ public class CfgProject implements EntryPoint {
 		}
 		
 		//use the "result" to update characters
-		final List<String> originCharacters = new LinkedList<String>();
-		final List<String> newCharacters = new LinkedList<String>();	
+//		final List<String> originCharacters = new LinkedList<String>();
+//		final List<String> newCharacters = new LinkedList<String>();	
 
 		List<HashMap<String, String>> dataToShow = new LinkedList<HashMap<String, String>>();
 		
@@ -334,7 +603,7 @@ public class CfgProject implements EntryPoint {
 			String key = entry.getKey();
 			String value = entry.getValue();
 			//use the "result" to update characters
-			originCharacters.add(key);
+//			originCharacters.add(key);
 			HashMap<String, String> tmp = new HashMap<String, String>();
 			tmp.put(key, value);
 			dataToShow.add(tmp);
@@ -486,15 +755,15 @@ public class CfgProject implements EntryPoint {
 					
 					
 					// after selected one character, update the pool of the characters (originCharacters)
-					for(String character : originCharacters) {
-						if (character.equals(charName) == false) {
-							newCharacters.add(character);
-
-						}
-					}
+//					for(String character : originCharacters) {
+//						if (character.equals(charName) == false) {
+//							newCharacters.add(character);
+//
+//						}
+//					}
 					
 					// issue another RPC to get the selected character and states:species
-					updateStates(remainingTaxa, newCharacters, charName);
+					updateStates(remainingTaxa, charName);
 					
 					
 				}

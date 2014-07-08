@@ -21,7 +21,6 @@ public class TaxonManager implements Serializable{
 	private CSVReader reader;
 	private List<Taxon> taxa;
 	private List<String> characters;
-	private HashMap<String, List<String>> statesToSpecies = new HashMap<String, List<String>>();
 	
 	public TaxonManager() {
 		
