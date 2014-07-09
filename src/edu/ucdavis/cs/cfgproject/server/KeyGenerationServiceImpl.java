@@ -27,19 +27,27 @@ public class KeyGenerationServiceImpl extends RemoteServiceServlet implements Ke
 		//get the pool of the taxa, if the pool is empty, read the input CSV file
 //		final String filePath = "/Users/Ryan/Documents/workspace/CfgProject/war/AchlilleaSp2.csv";
 //		final String filePath = "/Users/Ryan/Documents/workspace/CfgProject/war/AchlilleaSp3.csv";
-		final String filePath = "mapQueryNew.csv";
-		
-		TaxonManager tMgr = new TaxonManager(taxa);
-		
-		// read the input CSV file
-		List<Taxon> allTaxa = null;
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		Properties properties = new Properties();
 		try {
-			allTaxa = tMgr.readCSVFile(filePath);
-		} catch (Exception e) {
+			properties.load(loader.getResourceAsStream("config.properties"));
+			
+			final String filePath = properties.getProperty("input");
+			
+			TaxonManager tMgr = new TaxonManager(taxa);
+			
+			// read the input CSV file
+			List<Taxon> allTaxa = null;
+			try {
+				allTaxa = tMgr.readCSVFile(filePath);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return allTaxa;
+		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		return allTaxa;
-		
+			return new LinkedList<Taxon>();
+		}		
 	}
 	
 	@Override
