@@ -3,8 +3,9 @@ package edu.ucdavis.cs.cfgproject.client;
 import java.io.*;
 import java.util.*;
 
+import edu.ucdavis.cs.cfgproject.server.TaxonManager;
 import edu.ucdavis.cs.cfgproject.shared.State;
-import edu.ucdavis.cs.cfgproject.shared.TaxonManager;
+import edu.ucdavis.cs.cfgproject.shared.StatesToSpeciesCreator;
 import edu.ucdavis.cs.cfgproject.shared.Taxon;
 import au.com.bytecode.opencsv.*;
 
@@ -331,7 +332,7 @@ public class CfgProject implements EntryPoint {
 //		KeyGenerationSvc.retrieveTaxaByCheckBoxes(allTaxa, characterStateCheckBoxMap, updateTaxaByCheckBoxesCallback);
 		
 		
-		TaxonManager tMgr = new TaxonManager(allTaxa);
+		StatesToSpeciesCreator statesToSpeciesCreator = new StatesToSpeciesCreator(allTaxa);
 		
 		List<Taxon> deletedTaxa = new LinkedList<Taxon>();
 		List<Taxon> remainingTaxa = new LinkedList<Taxon>();
@@ -344,7 +345,7 @@ public class CfgProject implements EntryPoint {
 			
 			// for each character, create HashMap statesToSpecies
 			HashMap<String, List<Taxon>> statesToSpecies = new HashMap<String, List<Taxon>>();
-			statesToSpecies = tMgr.createStatesToSpecies(character);
+			statesToSpecies = statesToSpeciesCreator.createStatesToSpecies(character);
 			List<Taxon> taxonList = new LinkedList<Taxon>();
 			
 			// By this character go through every state

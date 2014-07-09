@@ -1,4 +1,4 @@
-package edu.ucdavis.cs.cfgproject.shared;
+package edu.ucdavis.cs.cfgproject.server;
 
 import java.io.FileReader;
 import java.io.Serializable;
@@ -12,6 +12,9 @@ import org.paukov.combinatorics.Factory;
 import org.paukov.combinatorics.Generator;
 import org.paukov.combinatorics.ICombinatoricsVector;
 
+import edu.ucdavis.cs.cfgproject.shared.State;
+import edu.ucdavis.cs.cfgproject.shared.StatesToSpeciesCreator;
+import edu.ucdavis.cs.cfgproject.shared.Taxon;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -57,6 +60,7 @@ public class TaxonManager implements Serializable{
 	    	result.add(taxon);
 	    }
 	    return result;
+		//return new ArrayList<Taxon>();
 	}
 
 	public String[] getSplitedValues(String multiValue) {
@@ -71,32 +75,13 @@ public class TaxonManager implements Serializable{
 	}
 	
 	
-	// given a particular character, return a hashmap of states:species (statesToSpecies)
-	public HashMap<String, List<Taxon>> createStatesToSpecies(String character) {
-		HashMap<String, List<Taxon>> statesToSpecies = new HashMap<String, List<Taxon>>();
-		for(Taxon taxon : this.getTaxa()) {
-			State statesOfTaxon = taxon.getAllStatesByCharacter(character);
-			String[] stateValues = statesOfTaxon.getValues();
-			for(String stateValue : stateValues) {
-				List<Taxon> taxaBufferAtThisStateValue = new LinkedList<Taxon>();
-				
-				if(statesToSpecies.containsKey(stateValue)) {
-					taxaBufferAtThisStateValue = statesToSpecies.get(stateValue);
-					taxaBufferAtThisStateValue.add(taxon);	
-					statesToSpecies.put(stateValue, taxaBufferAtThisStateValue);
-				} else {
-					taxaBufferAtThisStateValue.add(taxon);
-					statesToSpecies.put(stateValue, taxaBufferAtThisStateValue);
-				}
-			}
-		}
-		return statesToSpecies;
-	}
+
 	
 	public List<String> getSpeciesNamesbyCharacterAndState(String character, String state) {
 		HashMap<String, List<Taxon>> statesToSpecies = new HashMap<String, List<Taxon>>();
 		List<String> speciesNames = new LinkedList<String>();
-		statesToSpecies = this.createStatesToSpecies(character);
+		StatesToSpeciesCreator statesToSpeciesCreator = new StatesToSpeciesCreator(taxa);
+		statesToSpecies = statesToSpeciesCreator.createStatesToSpecies(character);
 		for(Taxon taxon : statesToSpecies.get(state)) {
 			speciesNames.add(taxon.getName());
 		}
@@ -135,7 +120,8 @@ public class TaxonManager implements Serializable{
 	
 	public HashMap<Integer, List<List<List<String>>>> genDict(String character) {
 		HashMap<String, List<Taxon>> statesToSpecies = new HashMap<String, List<Taxon>>();
-		statesToSpecies = this.createStatesToSpecies(character);
+		StatesToSpeciesCreator statesToSpeciesCreator = new StatesToSpeciesCreator(taxa);
+		statesToSpecies = statesToSpeciesCreator.createStatesToSpecies(character);
 		int numOfStates = statesToSpecies.size();
 		HashMap<Integer, List<List<List<String>>>> dict = new HashMap<Integer, List<List<List<String>>>>();
 		List<String> states = new LinkedList<String>(); //states now contains all states 

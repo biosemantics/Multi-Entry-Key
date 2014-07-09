@@ -17,8 +17,8 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import edu.ucdavis.cs.cfgproject.client.KeyGenerationService;
 import edu.ucdavis.cs.cfgproject.shared.State;
+import edu.ucdavis.cs.cfgproject.shared.StatesToSpeciesCreator;
 import edu.ucdavis.cs.cfgproject.shared.Taxon;
-import edu.ucdavis.cs.cfgproject.shared.TaxonManager;
 
 public class KeyGenerationServiceImpl extends RemoteServiceServlet implements KeyGenerationService {
 	
@@ -27,7 +27,7 @@ public class KeyGenerationServiceImpl extends RemoteServiceServlet implements Ke
 		//get the pool of the taxa, if the pool is empty, read the input CSV file
 //		final String filePath = "/Users/Ryan/Documents/workspace/CfgProject/war/AchlilleaSp2.csv";
 //		final String filePath = "/Users/Ryan/Documents/workspace/CfgProject/war/AchlilleaSp3.csv";
-		final String filePath = "/Users/Ryan/Documents/workspace/CfgProject/war/mapQueryNew.csv";
+		final String filePath = "mapQueryNew.csv";
 		
 		TaxonManager tMgr = new TaxonManager(taxa);
 		
@@ -98,15 +98,15 @@ public class KeyGenerationServiceImpl extends RemoteServiceServlet implements Ke
 	@Override
 	public HashMap<String, List<Taxon>> retrieveStatesAndSpecies(List<Taxon> taxa, String character) {
 		HashMap<String, List<Taxon>> statesAndSpeciesPairs = new HashMap<String, List<Taxon>>();
-		TaxonManager tMgr = new TaxonManager(taxa);
-		statesAndSpeciesPairs = tMgr.createStatesToSpecies(character);
+		StatesToSpeciesCreator statesToSpeciesCreator = new StatesToSpeciesCreator(taxa);
+		statesAndSpeciesPairs = statesToSpeciesCreator.createStatesToSpecies(character);
 		return statesAndSpeciesPairs;
 	}
 	
 	@Override
 	public List<Taxon> retrieveTaxaByCheckBoxes(List<Taxon> allTaxa, HashMap<String, HashMap<String, CheckBox>> characterStateCheckBoxMap) {
 		
-		TaxonManager tMgr = new TaxonManager(allTaxa);
+		StatesToSpeciesCreator statesToSpeciesCreator = new StatesToSpeciesCreator(allTaxa);
 		
 		List<Taxon> deletedTaxa = new LinkedList<Taxon>();
 		List<Taxon> remainingTaxa = new LinkedList<Taxon>();
@@ -119,7 +119,7 @@ public class KeyGenerationServiceImpl extends RemoteServiceServlet implements Ke
 			
 			// for each character, create HashMap statesToSpecies
 			HashMap<String, List<Taxon>> statesToSpecies = new HashMap<String, List<Taxon>>();
-			statesToSpecies = tMgr.createStatesToSpecies(character);
+			statesToSpecies = statesToSpeciesCreator.createStatesToSpecies(character);
 			List<Taxon> taxonList = new LinkedList<Taxon>();
 			
 			// By this character go through every state
