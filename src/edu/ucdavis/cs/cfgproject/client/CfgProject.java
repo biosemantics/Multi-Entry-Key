@@ -58,6 +58,7 @@ public class CfgProject implements EntryPoint {
 	private VerticalPanel igCharStateCbPanel = new VerticalPanel();
 	private List<Taxon> taxaPool = new LinkedList<Taxon>();
 //	private List<String> charactersPool = new LinkedList<String>();
+	private Label taxaCntLabel = new Label("");
 	
 	/**
 	 * This is the entry point method.
@@ -100,7 +101,7 @@ public class CfgProject implements EntryPoint {
 		readTaxa(taxaPool);	
 		
 		// add stuff to west panel
-		westPanel.add(new Label("Input files: "));
+//		westPanel.add(new Label("Input files: "));
 		westPanel.add(new Label("Characters: "));
 //		characterTable.setPageSize(200);
 //		westPanel.add(characterTable);
@@ -110,8 +111,9 @@ public class CfgProject implements EntryPoint {
 		westPanel.add(igCharStateCbPanel);
 				
 		// add stuff to east panel;
-		eastPanel.add(new Label("Task names: "));
-		eastPanel.add(new Label("Remaining taxa: "));
+//		eastPanel.add(new Label("Task names: "));
+//		eastPanel.add(new Label("Remaining taxa: "));
+		eastPanel.add(taxaCntLabel);
 		taxaTable.setPageSize(200);
 		eastPanel.add(taxaTable);
 //		eastPanel.add(panel);
@@ -166,10 +168,10 @@ public class CfgProject implements EntryPoint {
 		AsyncCallback<List<Taxon>> updateTaxaCallback = new AsyncCallback<List<Taxon>>() {
 			public void onFailure(Throwable caught) {
 			}	
-			public void onSuccess(List<Taxon> remainingTaxa) {
+			public void onSuccess(List<Taxon> remainingTaxa) {				
 				// set all remaining taxa
 				setTaxaTable(allTaxa, remainingTaxa, characterStateCheckBoxMap, taxaTable);
-										
+				
 			}
 		};
 		// Make the call to get retrieve taxa
@@ -177,6 +179,14 @@ public class CfgProject implements EntryPoint {
 		
 	}
 	
+	public void showNumOfTaxa(List<Taxon> remainingTaxa, Label taxaCntLabel) {
+		int taxaCnt = 0;
+		taxaCnt = remainingTaxa.size();
+		taxaCntLabel.setText("The number of remaining taxa is: " + taxaCnt);
+		
+	}
+
+
 	public void updateCharactersAndIgAndStates (final List<Taxon> allTaxa, List<Taxon> taxa) {
 		
 		final List<Taxon> remainingTaxa = taxa;
@@ -428,6 +438,9 @@ public class CfgProject implements EntryPoint {
 	 * set all remaining taxa
 	 */
 	public void setTaxaTable(List<Taxon> allTaxa, List<Taxon> taxa, HashMap<String, HashMap<String, CheckBox>> characterStateCheckBoxMap, CellTable<String> taxaTable) {
+		
+		// show number of remaining taxa above taxaTable
+		showNumOfTaxa(taxa, taxaCntLabel);
 		
 		// clear the table first
 		while (taxaTable.getColumnCount() !=0 ) {
