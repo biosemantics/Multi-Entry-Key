@@ -3,12 +3,16 @@ package edu.ucdavis.cs.cfgproject.client;
 import java.io.*;
 import java.util.*;
 
+import javax.xml.stream.events.Characters;
+
 import edu.ucdavis.cs.cfgproject.server.TaxonManager;
 import edu.ucdavis.cs.cfgproject.shared.State;
 import edu.ucdavis.cs.cfgproject.shared.StatesToSpeciesCreator;
 import edu.ucdavis.cs.cfgproject.shared.Taxon;
 import au.com.bytecode.opencsv.*;
 
+import com.google.common.collect.Ordering;
+import com.google.common.collect.TreeMultimap;
 import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -59,6 +63,7 @@ public class CfgProject implements EntryPoint {
 	private List<Taxon> taxaPool = new LinkedList<Taxon>();
 //	private List<String> charactersPool = new LinkedList<String>();
 	private Label taxaCntLabel = new Label("");
+	
 	
 	/**
 	 * This is the entry point method.
@@ -280,6 +285,16 @@ public class CfgProject implements EntryPoint {
 			igCharStateCbPanel.clear();
 		}
 		
+		
+//	    TreeMultimap<String, String> map = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
+//	    map.put("k1", "v1");
+//	    map.put("k3", "v3");
+//	    map.put("k2", "v2");
+		
+//		Multimap<String, HorizontalPanel> map = ArrayListMultimap.create();
+		TreeMultimap<String, HorizontalPanel> map = TreeMultimap.create(Ordering.natural().reverse(), Ordering.arbitrary());
+		
+				
 		// iterate through the fancy data structure
 		for (Map.Entry<String, HashMap<String, CheckBox>> entry : characterStateCheckBoxMap.entrySet()) {
 			String character = entry.getKey();							//key
@@ -312,12 +327,19 @@ public class CfgProject implements EntryPoint {
 				
 				entryPanel.add(cb);
 			}
+			map.put(ig, entryPanel);
 			
-			igCharStateCbPanel.add(entryPanel);
+//			igCharStateCbPanel.add(entryPanel);
 			
 		}
 		
-		
+//		Map<String, HorizontalPanel> newMap = new TreeMap<String, HorizontalPanel>(Collections.reverseOrder());
+//		newMap.putAll(map);
+//		
+		for(HorizontalPanel hPanel : map.values()) {
+			igCharStateCbPanel.add(hPanel);
+			
+		}
 		
 		
 	}
