@@ -293,7 +293,7 @@ public class CfgProject implements EntryPoint {
 		
 //		Multimap<String, HorizontalPanel> map = ArrayListMultimap.create();
 		TreeMultimap<String, HorizontalPanel> map = TreeMultimap.create(Ordering.natural().reverse(), Ordering.arbitrary());
-		
+		boolean zeroIg = false;
 				
 		// iterate through the fancy data structure
 		for (Map.Entry<String, HashMap<String, CheckBox>> entry : characterStateCheckBoxMap.entrySet()) {
@@ -305,6 +305,12 @@ public class CfgProject implements EntryPoint {
 			
 			// for each entry create a HorizontalPanel
 			HorizontalPanel entryPanel = new HorizontalPanel();
+//			double igValue = Double.parseDouble(ig);
+//			if (igValue == 0.0 && zeroIg == false) {
+//				entryPanel.add(new Label("---------------"));
+//				zeroIg = true;
+//			}
+			
 			entryPanel.setSpacing(10);
 			entryPanel.add(igLabel);
 			entryPanel.add(characterLabel);
@@ -336,9 +342,23 @@ public class CfgProject implements EntryPoint {
 //		Map<String, HorizontalPanel> newMap = new TreeMap<String, HorizontalPanel>(Collections.reverseOrder());
 //		newMap.putAll(map);
 //		
-		for(HorizontalPanel hPanel : map.values()) {
-			igCharStateCbPanel.add(hPanel);
+//		for(HorizontalPanel hPanel : map.values()) {
+//			igCharStateCbPanel.add(hPanel);
+//			
+//		}
+		
+		for (Map.Entry<String, HorizontalPanel> igCbPair : map.entries()) {
+			String key = igCbPair.getKey();
+			HorizontalPanel value = igCbPair.getValue();
+			double igValue = Double.parseDouble(key);
 			
+			if (zeroIg == false && igValue == 0.0) {
+				igCharStateCbPanel.add(new Label("---------------"));
+				zeroIg = true;
+			}
+			
+			igCharStateCbPanel.add(value);
+
 		}
 		
 		
