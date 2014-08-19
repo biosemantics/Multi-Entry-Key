@@ -1,2 +1,0 @@
-serviceClass: edu.ucdavis.cs.cfgproject.client.ReadMatrixService
-path: AFA680AF25E9FB0D8DC18A94F53C438D.gwt.rpc

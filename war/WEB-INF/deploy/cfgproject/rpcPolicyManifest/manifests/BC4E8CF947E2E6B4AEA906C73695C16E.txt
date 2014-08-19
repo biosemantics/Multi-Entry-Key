@@ -1,2 +1,0 @@
-serviceClass: edu.ucdavis.cs.cfgproject.client.KeyGenerationService
-path: 7B2A630FCECD451181329E6C8DB4BD77.gwt.rpc
