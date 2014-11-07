@@ -1,13 +1,10 @@
 package edu.ucdavis.cs.cfgproject.server;
 
-import java.io.File;
 import java.util.Properties;
-import java.util.regex.Matcher;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 
-import edu.arizona.biosemantics.common.log.LogLevel;
 import edu.arizona.biosemantics.common.log.Logger;
 
 public class Configuration {

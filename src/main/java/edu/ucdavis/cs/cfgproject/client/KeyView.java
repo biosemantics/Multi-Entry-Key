@@ -1,6 +1,8 @@
 package edu.ucdavis.cs.cfgproject.client;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -9,9 +11,11 @@ import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 
+import edu.ucdavis.cs.cfgproject.client.event.DeselectStateEvent;
 import edu.ucdavis.cs.cfgproject.client.event.SelectStateEvent;
 import edu.ucdavis.cs.cfgproject.shared.TaxonMatrixExtractor;
 import edu.ucdavis.cs.cfgproject.shared.model.CharacterGain;
+import edu.ucdavis.cs.cfgproject.shared.model.CharacterStateValue;
 import edu.ucdavis.cs.cfgproject.shared.model.TaxonMatrix;
 import edu.ucdavis.cs.cfgproject.shared.rpc.IKeyGenerationService;
 import edu.ucdavis.cs.cfgproject.shared.rpc.IKeyGenerationServiceAsync;
@@ -23,6 +27,8 @@ public class KeyView extends HorizontalLayoutContainer {
 	private EventBus eventBus = new SimpleEventBus();
 	private CharactersView charactersView = new CharactersView(eventBus);
 	private TaxaView taxaView = new TaxaView(eventBus);
+	private TaxonMatrix taxonMatrix;
+	private Set<CharacterStateValue> selectedCharacterStateValues = new HashSet<CharacterStateValue>();
 	
 	public KeyView() {
 		add(charactersView, new HorizontalLayoutData(0.5, 1.0, new Margins(4)));
@@ -35,27 +41,44 @@ public class KeyView extends HorizontalLayoutContainer {
 		eventBus.addHandler(SelectStateEvent.TYPE, new SelectStateEvent.SelectStateHandler() {
 			@Override
 			public void onSelect(SelectStateEvent event) {
-				TaxonMatrix taxonMatrix = 
-						TaxonMatrixExtractor.extractTaxonMatrix(taxaView.getTaxonMatrix(), event.getCharacter(), event.getState());
-				setTaxa(taxonMatrix);
+				Alerter.startLoading();
+				selectedCharacterStateValues.add(event.getCharacterStateValue());
+				updateTaxa();
+			}
+		});
+		eventBus.addHandler(DeselectStateEvent.TYPE, new DeselectStateEvent.DeselectStateHandler() {
+			@Override
+			public void onSelect(DeselectStateEvent event) {
+				Alerter.startLoading();
+				selectedCharacterStateValues.remove(event.getCharacterStateValue());
+				updateTaxa();
 			}
 		});
 	}
-
-	public void setTaxa(TaxonMatrix taxonMatrix) {
-		taxaView.setTaxa(taxonMatrix);
-		updateKey();
+	
+	public void initialize(TaxonMatrix taxonMatrix) {
+		Alerter.startLoading();
+		this.taxonMatrix = taxonMatrix;
+		selectedCharacterStateValues.clear();
+		updateTaxa();
 	}
 
-	private void updateKey() {
-		final TaxonMatrix taxoMatrix = taxaView.getTaxonMatrix();
-    	keyGenerationService.getCharacterGains(taxoMatrix, new AsyncCallback<List<CharacterGain>>() {
+	public void updateTaxa() {
+		TaxonMatrix remainingTaxonMatrix = TaxonMatrixExtractor.extractTaxonMatrix(taxonMatrix, selectedCharacterStateValues);
+		taxaView.setTaxa(remainingTaxonMatrix);
+		updateKey(remainingTaxonMatrix);
+	}
+
+	private void updateKey(final TaxonMatrix reminaingTaxoMatrix) {
+    	keyGenerationService.getCharacterGains(reminaingTaxoMatrix, new AsyncCallback<List<CharacterGain>>() {
 			@Override
 			public void onFailure(Throwable caught) { 
+				Alerter.stopLoading();
 			}
 			@Override
 			public void onSuccess(List<CharacterGain> characterGains) {
-				charactersView.setCharacterGains(taxoMatrix, characterGains);
+				charactersView.setCharacterGains(taxonMatrix, characterGains, selectedCharacterStateValues);
+				Alerter.stopLoading();
 			}
 		});
 	}

@@ -36,7 +36,7 @@ public class Key implements EntryPoint {
 			}
 			@Override
 			public void onSuccess(final TaxonMatrix result) {
-				view.setTaxa(result);
+				view.initialize(result);
 			}
 		});
 	}

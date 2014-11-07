@@ -2,9 +2,9 @@ package edu.ucdavis.cs.cfgproject.client.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.GwtEvent.Type;
 
 import edu.ucdavis.cs.cfgproject.client.event.SelectStateEvent.SelectStateHandler;
+import edu.ucdavis.cs.cfgproject.shared.model.CharacterStateValue;
 
 public class SelectStateEvent extends GwtEvent<SelectStateHandler> {
 
@@ -13,13 +13,11 @@ public class SelectStateEvent extends GwtEvent<SelectStateHandler> {
 	}
 	
 	public static Type<SelectStateHandler> TYPE = new Type<SelectStateHandler>();
-	
-	private String character;
-	private String state;
 
-	public SelectStateEvent(String character, String state) {
-		this.character = character;
-		this.state = state;
+	private CharacterStateValue characterStateValue;
+
+	public SelectStateEvent(CharacterStateValue characterStateValue) {
+		this.characterStateValue = characterStateValue;
 	}
 
 	@Override
@@ -32,11 +30,8 @@ public class SelectStateEvent extends GwtEvent<SelectStateHandler> {
 		handler.onSelect(this);
 	}
 
-	public String getCharacter() {
-		return character;
+	public CharacterStateValue getCharacterStateValue() {
+		return characterStateValue;
 	}
 	
-	public String getState() {
-		return state;
-	}
 }

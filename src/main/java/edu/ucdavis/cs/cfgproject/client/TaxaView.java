@@ -1,63 +1,61 @@
 package edu.ucdavis.cs.cfgproject.client;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
+import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.SortDir;
+import com.sencha.gxt.data.shared.Store.StoreSortInfo;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
+import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
+import com.sencha.gxt.widget.core.client.grid.ColumnModel;
+import com.sencha.gxt.widget.core.client.grid.Grid;
 
 import edu.ucdavis.cs.cfgproject.shared.model.Taxon;
 import edu.ucdavis.cs.cfgproject.shared.model.TaxonMatrix;
-import edu.ucdavis.cs.cfgproject.shared.rpc.IKeyGenerationService;
-import edu.ucdavis.cs.cfgproject.shared.rpc.IKeyGenerationServiceAsync;
+import edu.ucdavis.cs.cfgproject.shared.model.TaxonProperties;
 
 public class TaxaView extends VerticalLayoutContainer {
 
 	private EventBus eventBus;
-	private CellTable<String> taxaTable;
-	private Label taxaLabel = new Label();
-	private TaxonMatrix currentTaxonMatrix;
+	private TaxonProperties taxonProperites = GWT.create(TaxonProperties.class);
+	private ListStore<Taxon> taxaStore;
+	private Grid<Taxon> taxaGrid;
+	private ColumnConfig<Taxon, String> nameColumn;
 	
 	public TaxaView(EventBus eventBus) {
 		this.eventBus = eventBus;
-		this.taxaTable = createTaxaTable();
+
 		setScrollMode(ScrollMode.AUTOY);
-		add(taxaLabel);
-		add(taxaTable);
+		add(createTaxaGrid());
 	}
 	
-	private CellTable<String> createTaxaTable() {
-		CellTable<String> result = new CellTable<String>();
-		TextColumn<String> nameColumn = new TextColumn<String>() {
-			@Override
-			public String getValue(String object) {
-				return object;
-			}
-		};
-	    nameColumn.setSortable(true);
-	    result.addColumn(nameColumn,"All remaining taxa");
-	    result.getColumnSortList().push(nameColumn);
-	    result.setPageSize(200);
-		return result;
+	private Grid<Taxon> createTaxaGrid() {
+		taxaStore = new ListStore<Taxon>(taxonProperites.key());
+		taxaStore.addSortInfo(new StoreSortInfo<Taxon>(new IdentityValueProvider<Taxon>(), SortDir.ASC));
+		nameColumn = new ColumnConfig<Taxon, String>(taxonProperites.name(), 
+				50, SafeHtmlUtils.fromTrustedString("<b>Remaining Taxa</b>"));
+		List<ColumnConfig<Taxon, ?>> columns = new ArrayList<ColumnConfig<Taxon, ?>>();
+		columns.add(nameColumn);
+	    ColumnModel<Taxon> cm = new ColumnModel<Taxon>(columns);
+		taxaGrid = new Grid<Taxon>(taxaStore, cm);
+		taxaGrid.getView().setAutoExpandColumn(nameColumn);
+		taxaGrid.getView().setStripeRows(true);
+		taxaGrid.getView().setColumnLines(true);
+		taxaGrid.getView().setSortingEnabled(true);
+	    return taxaGrid;
 	}
 
 	public void setTaxa(final TaxonMatrix taxonMatrix) {
-		currentTaxonMatrix = taxonMatrix;
-		taxaLabel.setText("Remaining taxa: " + taxonMatrix.size());
-		List<String> rowData = new LinkedList<String>();
-		for(Taxon taxon : taxonMatrix.getTaxa())
-			rowData.add(taxon.getName());
-		taxaTable.setRowData(rowData);
+		nameColumn.setHeader("Taxa  (Remaining;" + taxonMatrix.size() + ")");
+		taxaGrid.getView().getHeader().refresh();
+		taxaStore.clear();
+		taxaStore.addAll(taxonMatrix.getTaxa());
 	}	
-	
-	public TaxonMatrix getTaxonMatrix() {
-		return currentTaxonMatrix;
-	}
+
 }

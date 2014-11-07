@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class Taxon implements Serializable {
+public class Taxon implements Serializable, Comparable<Taxon> {
 	
 	private String name;
 	private Map<String, State> characterStateMap = new HashMap<String, State>();
@@ -32,6 +32,11 @@ public class Taxon implements Serializable {
 	// return all characters of a this taxon
 	public Set<String> getCharacters() {
 		return characterStateMap.keySet();
+	}
+
+	@Override
+	public int compareTo(Taxon t) {
+		return name.compareTo(t.name);
 	}
 	
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.ucdavis.cs.cfgproject.shared.model.CharacterStateValue;
 import edu.ucdavis.cs.cfgproject.shared.model.State;
 import edu.ucdavis.cs.cfgproject.shared.model.Taxon;
 import edu.ucdavis.cs.cfgproject.shared.model.TaxonMatrix;
@@ -30,13 +31,12 @@ public class TaxonMatrixExtractor {
 		return result;
 	}
 	
-
-	public static TaxonMatrix extractTaxonMatrix(TaxonMatrix taxonMatrix, String character, String state) {
-		List<Taxon> taxa = new LinkedList<Taxon>();
-		for(Taxon taxon : taxonMatrix.getTaxa()) {
-			if(taxon.getState(character).contains(state))
-				taxa.add(taxon);
-		}
+	public static TaxonMatrix extractTaxonMatrix(TaxonMatrix taxonMatrix, Set<CharacterStateValue> characterStateValues) {
+		Set<Taxon> taxa = new HashSet<Taxon>(taxonMatrix.getTaxa());
+		for(Taxon taxon : taxonMatrix.getTaxa()) 
+			for(CharacterStateValue characterStateValue : characterStateValues) 
+				if(!taxon.getState(characterStateValue.getCharacter()).contains(characterStateValue.getStateValue()))
+					taxa.remove(taxon);
 		return new TaxonMatrix(taxa);
 	}
 	
