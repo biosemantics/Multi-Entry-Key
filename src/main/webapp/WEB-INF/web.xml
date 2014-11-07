@@ -7,7 +7,7 @@
   
   <servlet>
     <servlet-name>KeyGenerationServiceImpl</servlet-name>
-    <servlet-class>edu.ucdavis.cs.cfgproject.server.KeyGenerationServiceImpl</servlet-class>
+    <servlet-class>edu.ucdavis.cs.cfgproject.server.rpc.KeyGenerationService</servlet-class>
   </servlet>
   
   <servlet-mapping>

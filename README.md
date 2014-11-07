@@ -25,4 +25,4 @@ Please [configure your git](http://git-scm.com/book/en/Customizing-Git-Git-Confi
 `com.google.gwt.dev.DevMode`
 
 #### Arguments
-`-remoteUI "${gwt_remote_ui_server_port}:${unique_id}" -startupUrl CfgProject.html -logLevel INFO -port auto -codeServerPort auto -war **full_path_to_your_git_dir**\cfgproject\target\cfgproject-0.0.1-SNAPSHOT edu.ucdavis.cs.cfgproject.CfgProject`
+`-remoteUI "${gwt_remote_ui_server_port}:${unique_id}" -startupUrl index.html -logLevel INFO -port auto -codeServerPort auto -war **full_path_to_your_git_dir**\cfgproject\target\cfgproject-0.0.1-SNAPSHOT edu.ucdavis.cs.cfgproject.CfgProject`
