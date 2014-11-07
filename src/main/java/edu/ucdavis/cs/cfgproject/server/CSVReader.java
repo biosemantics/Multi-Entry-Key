@@ -26,17 +26,18 @@ public class CSVReader {
 
 	public TaxonMatrix read(String filePath) throws IOException {
 		Set<Taxon> taxa = new HashSet<Taxon>();
-		au.com.bytecode.opencsv.CSVReader reader = new au.com.bytecode.opencsv.CSVReader(new FileReader(filePath), columnSeparator, CSVWriter.NO_QUOTE_CHARACTER);
-		
-		String[] head = reader.readNext();
-	    List<String[]> allLines = reader.readAll();
-	    for(String[] line : allLines) {
-	    	Taxon taxon = new Taxon(line[0]);
-	    	for(int i=1; i<line.length; i++)
-	    		taxon.setState(head[i], new State(getSplitedValues(line[i])));
-	    	taxa.add(taxon);
-	    }
-	    return new TaxonMatrix(taxa);
+		try (au.com.bytecode.opencsv.CSVReader reader = new au.com.bytecode.opencsv.CSVReader(new FileReader(filePath), 
+				columnSeparator, CSVWriter.NO_QUOTE_CHARACTER)) {
+			String[] head = reader.readNext();
+		    List<String[]> allLines = reader.readAll();
+		    for(String[] line : allLines) {
+		    	Taxon taxon = new Taxon(line[0]);
+		    	for(int i=1; i<line.length; i++)
+		    		taxon.setState(head[i], new State(getSplitedValues(line[i])));
+		    	taxa.add(taxon);
+		    }
+		    return new TaxonMatrix(taxa);
+		}
 	}
 	
 	public Set<String> getSplitedValues(String multiValue) {
