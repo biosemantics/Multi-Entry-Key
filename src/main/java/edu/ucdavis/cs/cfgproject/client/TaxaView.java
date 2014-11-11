@@ -31,7 +31,7 @@ public class TaxaView extends VerticalLayoutContainer {
 	public TaxaView(EventBus eventBus) {
 		this.eventBus = eventBus;
 
-		setScrollMode(ScrollMode.AUTOY);
+		setScrollMode(ScrollMode.AUTO);
 		add(createTaxaGrid());
 	}
 	

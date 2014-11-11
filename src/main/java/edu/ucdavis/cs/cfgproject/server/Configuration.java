@@ -14,6 +14,8 @@ public class Configuration {
 	
 	public static char valueSeparator;
 	public static char columnSeparator;
+	public static char escapeCharacter;
+	public static char quoteCharacter;
 	
 	static {		
 		try {
@@ -23,6 +25,8 @@ public class Configuration {
 			
 			valueSeparator = properties.getProperty("valueSeparator").charAt(0);
 			columnSeparator = properties.getProperty("columnSeparator").charAt(0);
+			escapeCharacter = properties.getProperty("escapeCharacter").charAt(0);
+			quoteCharacter = properties.getProperty("quoteCharacter").charAt(0);
 		} catch(Exception e) {
 			logger.error("Couldn't read configuration", e);
 		}

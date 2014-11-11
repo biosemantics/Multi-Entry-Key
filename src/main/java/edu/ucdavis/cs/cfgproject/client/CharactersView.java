@@ -1,5 +1,6 @@
 package edu.ucdavis.cs.cfgproject.client;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -30,26 +31,32 @@ import edu.ucdavis.cs.cfgproject.shared.model.TaxonMatrix;
 public class CharactersView extends VerticalLayoutContainer {
 	
 	private EventBus eventBus;
+	private AccordionLayoutContainer accordionLayoutContainer  = new AccordionLayoutContainer();
+	private AccordionLayoutAppearance appearance = GWT.<AccordionLayoutAppearance> create(AccordionLayoutAppearance.class);
 	private VerticalLayoutContainer informationGainContainer = new VerticalLayoutContainer();
+	private VerticalLayoutContainer selectedInformationGainContainer = new VerticalLayoutContainer();
 	private VerticalLayoutContainer noInformationGainContainer = new VerticalLayoutContainer();
+	private ContentPanel informationGainPanel = new ContentPanel(appearance);
+	private ContentPanel selectedInformationGainPanel = new ContentPanel(appearance);
+	private ContentPanel noInformationGainPanel = new ContentPanel(appearance);
 	
 	public CharactersView(EventBus eventBus) {
 		this.eventBus = eventBus;
 		
-		AccordionLayoutContainer accordionLayoutContainer = new AccordionLayoutContainer();
 		accordionLayoutContainer.setExpandMode(ExpandMode.SINGLE_FILL);
-	    AccordionLayoutAppearance appearance = GWT.<AccordionLayoutAppearance> create(AccordionLayoutAppearance.class);
 		
-		ContentPanel informationGainPanel = new ContentPanel(appearance);
-		informationGainPanel.setAnimCollapse(false);
-		informationGainPanel.setHeadingText("Information Gain");
+		informationGainContainer.setScrollMode(ScrollMode.AUTOY);
+		informationGainPanel.setHeadingText("Useful Characters for Differentation");
 		informationGainPanel.add(informationGainContainer);
 		accordionLayoutContainer.add(informationGainPanel);
 		
-	    ContentPanel noInformationGainPanel = new ContentPanel(appearance);
-	    noInformationGainPanel.setAnimCollapse(false);
-	    noInformationGainPanel.setBodyStyleName("pad-text");
-	    noInformationGainPanel.setHeadingText("Settings");
+		selectedInformationGainContainer.setScrollMode(ScrollMode.AUTOY);
+		selectedInformationGainPanel.setHeadingText("Selected Character States");
+		selectedInformationGainPanel.add(selectedInformationGainContainer);
+	    accordionLayoutContainer.add(selectedInformationGainPanel);
+		
+	    noInformationGainContainer.setScrollMode(ScrollMode.AUTOY);
+	    noInformationGainPanel.setHeadingText("Useless Characters for Differentiation");
 	    noInformationGainPanel.add(noInformationGainContainer);
 	    accordionLayoutContainer.add(noInformationGainPanel);
 	    
@@ -60,15 +67,39 @@ public class CharactersView extends VerticalLayoutContainer {
 	public void setCharacterGains(final TaxonMatrix taxonMatrix, List<CharacterGain> characterGains, Set<CharacterStateValue> selectedCharacterStateValues) {
 		informationGainContainer.clear();
 		noInformationGainContainer.clear();
+		selectedInformationGainContainer.clear();
+		Set<String> selectedCharacters = new HashSet<String>();
+		for(CharacterStateValue characterStatevalue : selectedCharacterStateValues) 
+			selectedCharacters.add(characterStatevalue.getCharacter());
 		
 		for(CharacterGain characterGain : characterGains) {
 			Set<String> stateValues = TaxonMatrixExtractor.extractCharacterStateValues(taxonMatrix, characterGain.getCharacter());
 			Widget widget = createEntry(characterGain, stateValues, selectedCharacterStateValues);
-			if(characterGain.getInformationGain() == 0.0)
-				noInformationGainContainer.add(widget, new VerticalLayoutData(1.0, -1));
-			else 			
-				informationGainContainer.add(widget, new VerticalLayoutData(1.0, -1));
+			
+			if(selectedCharacters.contains(characterGain.getCharacter()))
+				selectedInformationGainContainer.add(widget, new VerticalLayoutData(1.0, -1));
+			else {
+				if(characterGain.getInformationGain() == 0.0)
+					noInformationGainContainer.add(widget, new VerticalLayoutData(1.0, -1));
+				else 			
+					informationGainContainer.add(widget, new VerticalLayoutData(1.0, -1));
+			}
 		}
+		
+		if(isActiveInformationGain() && informationGainContainer.getWidgetCount() == 0)
+			accordionLayoutContainer.setActiveWidget(selectedInformationGainPanel);
+	}
+	
+	public boolean isActiveInformationGain() {
+		return accordionLayoutContainer.getActiveWidget().equals(informationGainPanel);
+	}
+	
+	public boolean isActiveNoInformationGain() {
+		return accordionLayoutContainer.getActiveWidget().equals(noInformationGainPanel);
+	}
+	
+	public boolean isActiveSelectedInformationGain() {
+		return accordionLayoutContainer.getActiveWidget().equals(selectedInformationGainPanel);
 	}
 
 	private Widget createEntry(final CharacterGain characterGain, Set<String> stateValues, Set<CharacterStateValue> selectedCharacterStateValues) {

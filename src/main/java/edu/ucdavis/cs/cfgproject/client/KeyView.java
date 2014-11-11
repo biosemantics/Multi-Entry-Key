@@ -11,6 +11,7 @@ import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 
+import edu.ucdavis.cs.cfgproject.client.common.Alerter;
 import edu.ucdavis.cs.cfgproject.client.event.DeselectStateEvent;
 import edu.ucdavis.cs.cfgproject.client.event.SelectStateEvent;
 import edu.ucdavis.cs.cfgproject.shared.TaxonMatrixExtractor;
@@ -27,6 +28,7 @@ public class KeyView extends HorizontalLayoutContainer {
 	private EventBus eventBus = new SimpleEventBus();
 	private CharactersView charactersView = new CharactersView(eventBus);
 	private TaxaView taxaView = new TaxaView(eventBus);
+	
 	private TaxonMatrix taxonMatrix;
 	private Set<CharacterStateValue> selectedCharacterStateValues = new HashSet<CharacterStateValue>();
 	

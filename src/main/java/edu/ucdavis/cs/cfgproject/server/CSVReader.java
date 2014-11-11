@@ -17,17 +17,21 @@ import edu.ucdavis.cs.cfgproject.shared.model.TaxonMatrix;
 public class CSVReader {
 	
 	private char valueSeparator = '|';
-	private char columnSeparator = ';';
+	private char columnSeparator = CSVWriter.DEFAULT_SEPARATOR;
+	private char quoteCharacter = CSVWriter.DEFAULT_QUOTE_CHARACTER;
+	private char escapeCharacter = CSVWriter.DEFAULT_ESCAPE_CHARACTER;
 	
-	public CSVReader(char columnSeparator, char valueSeparator) {
+	public CSVReader(char columnSeparator, char valueSeparator, char quoteCharacter, char escapeCharacter) {
 		this.columnSeparator = columnSeparator;
 		this.valueSeparator = valueSeparator;
+		this.quoteCharacter = quoteCharacter;
+		this.escapeCharacter = escapeCharacter;
 	}
 
 	public TaxonMatrix read(String filePath) throws IOException {
 		Set<Taxon> taxa = new HashSet<Taxon>();
 		try (au.com.bytecode.opencsv.CSVReader reader = new au.com.bytecode.opencsv.CSVReader(new FileReader(filePath), 
-				columnSeparator, CSVWriter.NO_QUOTE_CHARACTER)) {
+				columnSeparator, quoteCharacter, escapeCharacter)) {
 			String[] head = reader.readNext();
 		    List<String[]> allLines = reader.readAll();
 		    for(String[] line : allLines) {

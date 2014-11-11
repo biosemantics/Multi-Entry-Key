@@ -16,7 +16,8 @@ import edu.ucdavis.cs.cfgproject.shared.rpc.IKeyGenerationService;
 
 public class KeyGenerationService extends RemoteServiceServlet implements IKeyGenerationService {
 
-	private CSVReader reader = new CSVReader(Configuration.columnSeparator, Configuration.valueSeparator);
+	private CSVReader reader = new CSVReader(Configuration.columnSeparator, Configuration.valueSeparator, Configuration.quoteCharacter, 
+			Configuration.escapeCharacter);
 	private InformationGainCalculator informationGainCalculator = new InformationGainCalculator();
 	
 	@Override

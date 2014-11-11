@@ -1,4 +1,4 @@
-package edu.ucdavis.cs.cfgproject.client;
+package edu.ucdavis.cs.cfgproject.client.common;
 
 import com.sencha.gxt.widget.core.client.box.AutoProgressMessageBox;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
