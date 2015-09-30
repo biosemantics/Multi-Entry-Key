@@ -17,27 +17,34 @@ import edu.ucdavis.cs.cfgproject.shared.model.TaxonMatrix;
 public class InformationGainCalculator {
 	
 	public double calculateNDisc1Ig(TaxonMatrix taxonMatrix, String character) {
-		HashMap<Integer, List<List<List<String>>>> dict = new HashMap<Integer, List<List<List<String>>>>();
-		dict = this.genDict(taxonMatrix, character);
+		Map<String, Set<Taxon>> stateToTaxaMap = TaxonMatrixExtractor.extractStateToTaxaMap(taxonMatrix, character);
+		HashMap<Integer, List<List<String>>> dict = new HashMap<Integer, List<List<String>>>();
+		dict = this.genDict(stateToTaxaMap);
 		double tmp = 0.0;
 		double p = 0.0;
 		double ig = 0.0;
 		int combSize = 0;
 		int numberOfTaxa = taxonMatrix.size();
 		
-		for (Map.Entry<Integer, List<List<List<String>>>> entry : dict.entrySet()) {
+		for (Map.Entry<Integer, List<List<String>>> entry : dict.entrySet()) {
 			int key = entry.getKey();
-			List<List<List<String>>> value = entry.getValue();
+			List<List<String>> value = entry.getValue();
 			tmp = 0.0;
 			
-			for (List<List<String>> comb : value) {
+			for (List<String> comb : value) {
 				// now calculate the size of the combination list
+				List<String> listOfSpecies = new LinkedList<String>();
 				if (comb.size() > 1) {
+					listOfSpecies = this.getTaxonNamesbyState(stateToTaxaMap, comb.get(0));
 					for (int i=1;i<comb.size();i++) {
-						comb.get(0).retainAll(comb.get(i));
+						List<String> tmpSpecies = new LinkedList<String>();
+						tmpSpecies = this.getTaxonNamesbyState(stateToTaxaMap, comb.get(i));
+						listOfSpecies.retainAll(tmpSpecies);
 			        }
+				} else {
+					listOfSpecies = this.getTaxonNamesbyState(stateToTaxaMap, comb.get(0));
 				}
-				combSize = comb.get(0).size();
+				combSize = listOfSpecies.size();
 				p = 1.0 / numberOfTaxa * combSize;
 				if (p != 0) {
 					tmp += p * logBase2(p);
@@ -56,31 +63,30 @@ public class InformationGainCalculator {
 		return Math.log(x)/Math.log(2.0d);
 	}
 	
-	public HashMap<Integer, List<List<List<String>>>> genDict(TaxonMatrix taxonMatrix, String character) {
-		Map<String, Set<Taxon>> stateToTaxaMap = TaxonMatrixExtractor.extractStateToTaxaMap(taxonMatrix, character);
-		
+	public HashMap<Integer, List<List<String>>> genDict(Map<String, Set<Taxon>> stateToTaxaMap) {
 		int numOfStates = stateToTaxaMap.size();
-		HashMap<Integer, List<List<List<String>>>> dict = new HashMap<Integer, List<List<List<String>>>>();
+		HashMap<Integer, List<List<String>>> dict = new HashMap<Integer, List<List<String>>>();
 		List<String> states = new LinkedList<String>(); //states now contains all states 
 		for(String key : stateToTaxaMap.keySet()) {
 			states.add(key);
 		}
 		for(int i=1; i<=numOfStates; i++){
 			List<List<String>> combStateList = new LinkedList<List<String>>();
-			List<List<List<String>>> combSpeciesList = new LinkedList<List<List<String>>>();
+//			List<List<List<String>>> combSpeciesList = new LinkedList<List<List<String>>>();
 			combStateList = this.getStatesCombByNum(states, i);
 			
 			// now replace state names (combStateList) as species names (combSpeciesList) 
-			for (List<String> tmpList : combStateList) {
-				List<List<String>> newTmpList = new LinkedList<List<String>>();
-				for (String tmpString : tmpList) {
-					List<String> listOfSpecies = new LinkedList<String>();
-					listOfSpecies = this.getTaxonNamesbyCharacterAndState(taxonMatrix, character, tmpString);
-					newTmpList.add(listOfSpecies);
-				}
-				combSpeciesList.add(newTmpList);
-			}
-			dict.put(i, combSpeciesList);			
+//			for (List<String> tmpList : combStateList) {
+//				List<List<String>> newTmpList = new LinkedList<List<String>>();
+//				for (String tmpString : tmpList) {
+//					List<String> listOfSpecies = new LinkedList<String>();
+//					listOfSpecies = this.getTaxonNamesbyState(stateToTaxaMap, tmpString);
+//					newTmpList.add(listOfSpecies);
+//				}
+//				combSpeciesList.add(newTmpList);
+//			}
+//			System.out.println(character + ", " + i + ", " + combStateList + ", " + combSpeciesList);
+			dict.put(i, combStateList);			
 		}
 		return dict;	
 	}
@@ -114,8 +120,7 @@ public class InformationGainCalculator {
 		return comb;
 	}
 	
-	public List<String> getTaxonNamesbyCharacterAndState(TaxonMatrix taxonMatrix, String character, String state) {
-		Map<String, Set<Taxon>> stateToTaxaMap = TaxonMatrixExtractor.extractStateToTaxaMap(taxonMatrix, character);
+	public List<String> getTaxonNamesbyState(Map<String, Set<Taxon>> stateToTaxaMap, String state) {
 		List<String> taxonNames = new LinkedList<String>();
 		for(Taxon taxon : stateToTaxaMap.get(state)) {
 			taxonNames.add(taxon.getName());
