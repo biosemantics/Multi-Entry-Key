@@ -9,7 +9,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sencha.gxt.core.client.util.Margins;
+import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.MarginData;
 
 import edu.ucdavis.cs.cfgproject.client.common.Alerter;
 import edu.ucdavis.cs.cfgproject.client.event.DeselectStateEvent;
@@ -21,7 +24,7 @@ import edu.ucdavis.cs.cfgproject.shared.model.TaxonMatrix;
 import edu.ucdavis.cs.cfgproject.shared.rpc.IKeyGenerationService;
 import edu.ucdavis.cs.cfgproject.shared.rpc.IKeyGenerationServiceAsync;
 
-public class KeyView extends HorizontalLayoutContainer {
+public class KeyView extends BorderLayoutContainer {
 
 	private IKeyGenerationServiceAsync keyGenerationService = GWT.create(IKeyGenerationService.class);
 	
@@ -33,8 +36,29 @@ public class KeyView extends HorizontalLayoutContainer {
 	private Set<CharacterStateValue> selectedCharacterStateValues = new HashSet<CharacterStateValue>();
 	
 	public KeyView() {
-		add(charactersView, new HorizontalLayoutData(0.5, 1.0, new Margins(4)));
-		add(taxaView, new HorizontalLayoutData(0.5, 1.0, new Margins(4)));
+		BorderLayoutData westData = new BorderLayoutData(150);
+	    westData.setCollapsible(true);
+	    westData.setSplit(true);
+	    westData.setCollapseMini(true);
+	    westData.setMargins(new Margins(0, 5, 0, 5));
+	    this.setWestWidget(west, westData);
+	    
+	    ContentPanel east = new ContentPanel();
+	    east.add(taxaView);
+	    ContentPanel center = new ContentPanel();
+	    center.add(charactersView);
+	    
+	    BorderLayoutData eastData = new BorderLayoutData(150);
+	    eastData.setMargins(new Margins(0, 5, 0, 5));
+	    eastData.setCollapsible(true);
+	    eastData.setSplit(true);
+	    eastData.setMaxSize(Integer.MAX_VALUE);
+	    MarginData centerData = new MarginData();
+	    this.setCenterWidget(center, centerData);
+	    this.setEastWidget(east, eastData);
+	    		
+		//add(charactersView, new HorizontalLayoutData(0.5, 1.0, new Margins(4)));
+		//add(taxaView, new HorizontalLayoutData(0.5, 1.0, new Margins(4)));
 		
 		bindEvents();
 	}
