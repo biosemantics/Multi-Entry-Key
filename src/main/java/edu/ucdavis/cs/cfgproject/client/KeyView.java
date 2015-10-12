@@ -48,7 +48,7 @@ public class KeyView extends BorderLayoutContainer {
 	    ContentPanel center = new ContentPanel();
 	    center.add(charactersView);
 	    
-	    BorderLayoutData eastData = new BorderLayoutData(150);
+	    BorderLayoutData eastData = new BorderLayoutData(350);
 	    eastData.setMargins(new Margins(0, 5, 0, 5));
 	    eastData.setCollapsible(true);
 	    eastData.setSplit(true);
