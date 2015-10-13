@@ -1,5 +1,6 @@
 package edu.ucdavis.cs.cfgproject.server.rpc;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -56,7 +57,7 @@ public class KeyGenerationService extends RemoteServiceServlet implements IKeyGe
 	private static TaxonMatrix generateRandomTaxonMatrix() {
 		// TODO generate your random matrix here
 		
-		List<Taxon> taxa = new LinkedList<Taxon>();
+		/*List<Taxon> taxa = new LinkedList<Taxon>();
 		
 		/*
 		Taxon a = new Taxon("a");
@@ -74,7 +75,7 @@ public class KeyGenerationService extends RemoteServiceServlet implements IKeyGe
 		*/
 		
 		
-		final int TAXON_SIZE = 4;
+		/*final int TAXON_SIZE = 4;
 		final int CHARACTER_SIZE = 1;
 		
 		for (int i=0; i<TAXON_SIZE; i++) {
@@ -101,6 +102,18 @@ public class KeyGenerationService extends RemoteServiceServlet implements IKeyGe
 		
 		
 		TaxonMatrix sample = new TaxonMatrix(taxa);
+		return sample;*/
+		
+		CSVReader reader = new CSVReader(Configuration.columnSeparator, Configuration.valueSeparator, Configuration.quoteCharacter, Configuration.escapeCharacter);
+		
+		TaxonMatrix sample = null;
+		try {
+			sample = reader.read("Matrix.csv");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return sample;
 	}
 	
