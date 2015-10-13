@@ -68,7 +68,6 @@ public class CharactersView extends VerticalLayoutContainer {
 	}
 	
 	private void expandAll(AccordionLayoutContainer accordionLayoutContainer) {
-		System.out.println("expand all");
 		for(int i=0; i<accordionLayoutContainer.getWidgetCount(); i++) 
 			((ContentPanel)accordionLayoutContainer.getWidget(i)).expand();
 	}
@@ -149,13 +148,7 @@ public class CharactersView extends VerticalLayoutContainer {
 		flowLayoutContainer.add(uselessContainer);
 		uselessPanel.setWidget(flowLayoutContainer);
 		if(activePanel == null)
-			activePanel = usefullPanel;
-		
-		System.out.println(activePanel.equals(usefullPanel));
-		System.out.println(activePanel.equals(uselessPanel));
-		System.out.println(activePanel.equals(selectedPanel));
-		
-		
+			activePanel = usefullPanel;		
 		categoriesContainer.setActiveWidget(activePanel);
 
 		//expandAll((AccordionLayoutContainer)((FlowLayoutContainer)activePanel.getWidget()).getWidget(0));
