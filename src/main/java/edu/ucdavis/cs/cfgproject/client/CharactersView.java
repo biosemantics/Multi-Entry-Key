@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -18,8 +20,14 @@ import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.container.AccordionLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.AccordionLayoutContainer.AccordionLayoutAppearance;
 import com.sencha.gxt.widget.core.client.container.AccordionLayoutContainer.ExpandMode;
+import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
+import com.sencha.gxt.widget.core.client.menu.Item;
+import com.sencha.gxt.widget.core.client.menu.Menu;
+import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 import edu.ucdavis.cs.cfgproject.client.event.DeselectStateEvent;
 import edu.ucdavis.cs.cfgproject.client.event.SelectStateEvent;
@@ -31,80 +39,146 @@ import edu.ucdavis.cs.cfgproject.shared.model.TaxonMatrix;
 public class CharactersView extends VerticalLayoutContainer {
 	
 	private EventBus eventBus;
-	private AccordionLayoutContainer accordionLayoutContainer  = new AccordionLayoutContainer();
+	private AccordionLayoutContainer categoriesContainer  = new AccordionLayoutContainer();
 	private AccordionLayoutAppearance appearance = GWT.<AccordionLayoutAppearance> create(AccordionLayoutAppearance.class);
-	private VerticalLayoutContainer informationGainContainer = new VerticalLayoutContainer();
-	private VerticalLayoutContainer selectedInformationGainContainer = new VerticalLayoutContainer();
-	private VerticalLayoutContainer noInformationGainContainer = new VerticalLayoutContainer();
-	private ContentPanel informationGainPanel = new ContentPanel(appearance);
-	private ContentPanel selectedInformationGainPanel = new ContentPanel(appearance);
-	private ContentPanel noInformationGainPanel = new ContentPanel(appearance);
+	private AccordionLayoutContainer usefullContainer;
+	private AccordionLayoutContainer selectedContainer;
+	private AccordionLayoutContainer uselessContainer;
+	private ContentPanel usefullPanel = new ContentPanel(appearance);
+	private ContentPanel selectedPanel = new ContentPanel(appearance);
+	private ContentPanel uselessPanel = new ContentPanel(appearance);
+
 	
 	public CharactersView(EventBus eventBus) {
 		this.eventBus = eventBus;
 		
-		accordionLayoutContainer.setExpandMode(ExpandMode.SINGLE_FILL);
+		usefullPanel.setHeadingText("<b>Usefull Characters for Differentiation</b>");
+		selectedPanel.setHeadingText("<b>Selected Characters for Differentiation</b>");
+		uselessPanel.setHeadingText("<b>Useless Characters for Differentiation</b>");
+		categoriesContainer.add(usefullPanel);
+		categoriesContainer.add(selectedPanel);
+		categoriesContainer.add(uselessPanel);
+		categoriesContainer.setExpandMode(ExpandMode.SINGLE_FILL);
+		add(categoriesContainer, new VerticalLayoutData(1, 1));
 		
-		informationGainContainer.setScrollMode(ScrollMode.AUTOY);
-		informationGainPanel.setHeadingText("Useful Characters for Differentation");
-		informationGainPanel.add(informationGainContainer);
-		accordionLayoutContainer.add(informationGainPanel);
-		
-		selectedInformationGainContainer.setScrollMode(ScrollMode.AUTOY);
-		selectedInformationGainPanel.setHeadingText("Selected Character States");
-		selectedInformationGainPanel.add(selectedInformationGainContainer);
-	    accordionLayoutContainer.add(selectedInformationGainPanel);
-		
-	    noInformationGainContainer.setScrollMode(ScrollMode.AUTOY);
-	    noInformationGainPanel.setHeadingText("Useless Characters for Differentiation");
-	    noInformationGainPanel.add(noInformationGainContainer);
-	    accordionLayoutContainer.add(noInformationGainPanel);
-	    
-		accordionLayoutContainer.setActiveWidget(informationGainPanel);
-		add(accordionLayoutContainer, new VerticalLayoutData(1, 1));
+		Menu menu = createContextMenu();
+		usefullPanel.setContextMenu(menu);
+		uselessPanel.setContextMenu(menu);
+		selectedPanel.setContextMenu(menu);
 	}
 	
-	public void setCharacterGains(final TaxonMatrix taxonMatrix, List<CharacterGain> characterGains, Set<CharacterStateValue> selectedCharacterStateValues) {
-		informationGainContainer.clear();
-		noInformationGainContainer.clear();
-		selectedInformationGainContainer.clear();
+	private void expandAll(AccordionLayoutContainer accordionLayoutContainer) {
+		System.out.println("expand all");
+		for(int i=0; i<accordionLayoutContainer.getWidgetCount(); i++) 
+			((ContentPanel)accordionLayoutContainer.getWidget(i)).expand();
+	}
+	
+	private void collapseAll(AccordionLayoutContainer accordionLayoutContainer) {
+		for(int i=0; i<accordionLayoutContainer.getWidgetCount(); i++) 
+			((ContentPanel)accordionLayoutContainer.getWidget(i)).collapse();
+	}
+	
+	private Menu createContextMenu() {
+		Menu menu = new Menu();
+		
+		MenuItem insert = new MenuItem();
+		insert.setText("Expand All");
+		insert.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				ContentPanel contentPanel = (ContentPanel)categoriesContainer.getActiveWidget();
+				AccordionLayoutContainer accordionLayoutContainer = (AccordionLayoutContainer)((FlowLayoutContainer)contentPanel.getWidget()).getWidget(0);
+				expandAll(accordionLayoutContainer);
+			}			
+		});
+
+		MenuItem remove = new MenuItem();
+		remove.setText("Collapse All");
+		remove.addSelectionHandler(new SelectionHandler<Item>() {
+			@Override
+			public void onSelection(SelectionEvent<Item> event) {
+				ContentPanel contentPanel = (ContentPanel)categoriesContainer.getActiveWidget();
+				AccordionLayoutContainer accordionLayoutContainer = (AccordionLayoutContainer)((FlowLayoutContainer)contentPanel.getWidget()).getWidget(0);
+				collapseAll(accordionLayoutContainer);
+			}
+		});
+	      
+		menu.add(insert);
+		menu.add(remove);
+		return menu;
+	}
+
+	public void setCharacterGains(final TaxonMatrix taxonMatrix, List<CharacterGain> characterGains, Set<CharacterStateValue> selectedCharacterStateValues) {		
+		ContentPanel activePanel = (ContentPanel)categoriesContainer.getActiveWidget();
+		
+		usefullContainer = new AccordionLayoutContainer();
+		usefullContainer.setExpandMode(ExpandMode.MULTI);
+		selectedContainer = new AccordionLayoutContainer();
+		selectedContainer.setExpandMode(ExpandMode.MULTI);
+		uselessContainer = new AccordionLayoutContainer();
+		uselessContainer.setExpandMode(ExpandMode.MULTI);
+		
 		Set<String> selectedCharacters = new HashSet<String>();
 		for(CharacterStateValue characterStatevalue : selectedCharacterStateValues) 
 			selectedCharacters.add(characterStatevalue.getCharacter());
 		
 		for(CharacterGain characterGain : characterGains) {
 			Set<String> stateValues = TaxonMatrixExtractor.extractCharacterStateValues(taxonMatrix, characterGain.getCharacter());
-			Widget widget = createEntry(characterGain, stateValues, selectedCharacterStateValues);
+			ContentPanel widget = createEntry(characterGain, stateValues, selectedCharacterStateValues);
 			
 			if(selectedCharacters.contains(characterGain.getCharacter()))
-				selectedInformationGainContainer.add(widget, new VerticalLayoutData(1.0, -1));
+				selectedContainer.add(widget);
 			else {
 				if(characterGain.getInformationGain() == 0.0)
-					noInformationGainContainer.add(widget, new VerticalLayoutData(1.0, -1));
+					uselessContainer.add(widget);
 				else 			
-					informationGainContainer.add(widget, new VerticalLayoutData(1.0, -1));
+					usefullContainer.add(widget);
 			}
 		}
 		
-		if(isActiveInformationGain() && informationGainContainer.getWidgetCount() == 0)
-			accordionLayoutContainer.setActiveWidget(selectedInformationGainPanel);
+		FlowLayoutContainer flowLayoutContainer = new FlowLayoutContainer();
+		flowLayoutContainer.setScrollMode(ScrollMode.AUTO);
+		flowLayoutContainer.add(usefullContainer);
+		usefullPanel.setWidget(flowLayoutContainer);
+		flowLayoutContainer = new FlowLayoutContainer();
+		flowLayoutContainer.setScrollMode(ScrollMode.AUTO);
+		flowLayoutContainer.add(selectedContainer);
+		selectedPanel.setWidget(flowLayoutContainer);
+		flowLayoutContainer = new FlowLayoutContainer();
+		flowLayoutContainer.setScrollMode(ScrollMode.AUTO);
+		flowLayoutContainer.add(uselessContainer);
+		uselessPanel.setWidget(flowLayoutContainer);
+		if(activePanel == null)
+			activePanel = usefullPanel;
+		
+		System.out.println(activePanel.equals(usefullPanel));
+		System.out.println(activePanel.equals(uselessPanel));
+		System.out.println(activePanel.equals(selectedPanel));
+		
+		
+		categoriesContainer.setActiveWidget(activePanel);
+
+		//expandAll((AccordionLayoutContainer)((FlowLayoutContainer)activePanel.getWidget()).getWidget(0));
+		categoriesContainer.forceLayout();
 	}
 	
-	public boolean isActiveInformationGain() {
-		return accordionLayoutContainer.getActiveWidget().equals(informationGainPanel);
+	public boolean isActiveUsefull() {
+		return categoriesContainer.getActiveWidget() != null && categoriesContainer.getActiveWidget().equals(usefullPanel);
 	}
 	
-	public boolean isActiveNoInformationGain() {
-		return accordionLayoutContainer.getActiveWidget().equals(noInformationGainPanel);
+	public boolean isActiveUseless() {
+		return categoriesContainer.getActiveWidget() != null && categoriesContainer.getActiveWidget().equals(uselessPanel);
 	}
 	
-	public boolean isActiveSelectedInformationGain() {
-		return accordionLayoutContainer.getActiveWidget().equals(selectedInformationGainPanel);
+	public boolean isActiveSelected() {
+		return categoriesContainer.getActiveWidget() != null && categoriesContainer.getActiveWidget().equals(selectedPanel);
 	}
 
-	private Widget createEntry(final CharacterGain characterGain, Set<String> stateValues, Set<CharacterStateValue> selectedCharacterStateValues) {
-	    HorizontalPanel horizontalPanel = new HorizontalPanel();
-		for (final String stateValue : stateValues) {
+	private ContentPanel createEntry(final CharacterGain characterGain, Set<String> stateValues, Set<CharacterStateValue> selectedCharacterStateValues) {
+		ContentPanel result = new ContentPanel(appearance);		
+		result.setHeadingText(characterGain.toString());
+	    VerticalLayoutContainer verticalLayoutContainer = new VerticalLayoutContainer();
+	    for (final String stateValue : stateValues) {
 			CheckBox checkBox = new CheckBox(stateValue);
 			final CharacterStateValue characterStateValue = new CharacterStateValue(characterGain.getCharacter(), stateValue);
 			checkBox.setValue(selectedCharacterStateValues.contains(characterStateValue));
@@ -117,11 +191,9 @@ public class CharactersView extends VerticalLayoutContainer {
 						eventBus.fireEvent(new DeselectStateEvent(characterStateValue));
 				}
 		    });
-		    horizontalPanel.add(checkBox);
+			verticalLayoutContainer.add(checkBox);
 		}
-	 
-		FieldLabel result = new FieldLabel(horizontalPanel, characterGain.toString());
-		result.setLabelWidth(600);
+	    result.add(verticalLayoutContainer);
 	    return result;
 	}
 }
