@@ -74,8 +74,8 @@ public class KeyGenerationService extends RemoteServiceServlet implements IKeyGe
 		*/
 		
 		
-		final int TAXON_SIZE = 64;
-		final int CHARACTER_SIZE = 64;
+		final int TAXON_SIZE = 4;
+		final int CHARACTER_SIZE = 1;
 		
 		for (int i=0; i<TAXON_SIZE; i++) {
 			String taxonName = "t" + i;

@@ -61,4 +61,24 @@ public class TaxonMatrixExtractor {
 		return statesToSpecies;
 	}
 	
+	public static Map<State, Set<Taxon>> extractStateObjToTaxaMap(TaxonMatrix taxonMatrix, String character) {
+		HashMap<State, Set<Taxon>> stateObjToSpecies = new HashMap<State, Set<Taxon>>();
+		for(Taxon taxon : taxonMatrix.getTaxa()) {
+			State state = taxon.getState(character);
+			
+			if (state.getValues().size() > 1) {
+				Set<Taxon> taxa = new HashSet<Taxon>();
+				if (stateObjToSpecies.containsKey(state)) {
+					taxa = stateObjToSpecies.get(state);
+					taxa.add(taxon);
+					stateObjToSpecies.put(state, taxa);
+				} else {
+					taxa.add(taxon);
+					stateObjToSpecies.put(state, taxa);
+				}
+			}
+		}
+		return stateObjToSpecies;
+	}
+	
 }

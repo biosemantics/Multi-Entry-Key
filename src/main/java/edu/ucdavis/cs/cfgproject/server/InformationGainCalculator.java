@@ -1,6 +1,7 @@
 package edu.ucdavis.cs.cfgproject.server;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.paukov.combinatorics.Generator;
 import org.paukov.combinatorics.ICombinatoricsVector;
 
 import edu.ucdavis.cs.cfgproject.shared.TaxonMatrixExtractor;
+import edu.ucdavis.cs.cfgproject.shared.model.State;
 import edu.ucdavis.cs.cfgproject.shared.model.Taxon;
 import edu.ucdavis.cs.cfgproject.shared.model.TaxonMatrix;
 
@@ -18,42 +20,86 @@ public class InformationGainCalculator {
 	
 	public double calculateNDisc1Ig(TaxonMatrix taxonMatrix, String character) {
 		Map<String, Set<Taxon>> stateToTaxaMap = TaxonMatrixExtractor.extractStateToTaxaMap(taxonMatrix, character);
-		HashMap<Integer, List<List<String>>> dict = new HashMap<Integer, List<List<String>>>();
-		dict = this.genDict(stateToTaxaMap);
+		Map<State, Set<Taxon>> stateObjToTaxaMap = TaxonMatrixExtractor.extractStateObjToTaxaMap(taxonMatrix, character);
+//		HashMap<Integer, List<List<String>>> dict = new HashMap<Integer, List<List<String>>>();
+//		dict = this.genDict(stateToTaxaMap);
 		double tmp = 0.0;
 		double p = 0.0;
 		double ig = 0.0;
 		int combSize = 0;
 		int numberOfTaxa = taxonMatrix.size();
 		
-		for (Map.Entry<Integer, List<List<String>>> entry : dict.entrySet()) {
-			int key = entry.getKey();
-			List<List<String>> value = entry.getValue();
-			tmp = 0.0;
-			
-			for (List<String> comb : value) {
-				// now calculate the size of the combination list
-				List<String> listOfSpecies = new LinkedList<String>();
-				if (comb.size() > 1) {
-					listOfSpecies = this.getTaxonNamesbyState(stateToTaxaMap, comb.get(0));
-					for (int i=1;i<comb.size();i++) {
-						List<String> tmpSpecies = new LinkedList<String>();
-						tmpSpecies = this.getTaxonNamesbyState(stateToTaxaMap, comb.get(i));
-						listOfSpecies.retainAll(tmpSpecies);
-			        }
-				} else {
-					listOfSpecies = this.getTaxonNamesbyState(stateToTaxaMap, comb.get(0));
-				}
-				combSize = listOfSpecies.size();
-				p = 1.0 / numberOfTaxa * combSize;
-				if (p != 0) {
-					tmp += p * logBase2(p);
-				} else {
-					tmp += 0;
-				}
-			}
-			ig += Math.pow((-1), key) * tmp;
+		// test
+//		for (Map.Entry<State, Set<Taxon>> entry : stateObjToTaxaMap.entrySet()) {
+//			System.out.println(entry.getKey().getValues());
+//			Set<Taxon> tmptaxa = new HashSet<Taxon>();
+//			tmptaxa = entry.getValue();
+//			for (Taxon taxon : tmptaxa) {
+//				System.out.println(taxon.getName());
+//			}
+//		}
+		
+		// state size = 1
+		List<String> states = new LinkedList<String>(); //states now contains all states 
+		for (String key : stateToTaxaMap.keySet()) {
+			states.add(key);
 		}
+//		System.out.println(states);
+		
+		for (String state : states) {
+			List<String> listOfSpecies = new LinkedList<String>();
+			listOfSpecies = this.getTaxonNamesbyState(stateToTaxaMap, state);
+			combSize = listOfSpecies.size();
+			p = 1.0 / numberOfTaxa * combSize;
+			if (p != 0) {
+				tmp += p * logBase2(p);
+			} else {
+				tmp += 0;
+			}
+		}
+		ig += (-1) * tmp;
+		
+		// state size > 1
+		for (Map.Entry<State, Set<Taxon>> entry : stateObjToTaxaMap.entrySet()) {
+			int stateSize = entry.getKey().getValues().size();
+			int speciesSize = entry.getValue().size();
+			p = 1.0 / numberOfTaxa * speciesSize;
+			if (p != 0) {
+				tmp = p * logBase2(p);
+			} else {
+				tmp = 0;
+			}
+			ig += Math.pow((-1), stateSize) * tmp;
+		}
+		
+//		for (Map.Entry<Integer, List<List<String>>> entry : dict.entrySet()) {
+//			int key = entry.getKey();
+//			List<List<String>> value = entry.getValue();
+//			tmp = 0.0;
+//			
+//			for (List<String> comb : value) {
+//				// now calculate the size of the combination list
+//				List<String> listOfSpecies = new LinkedList<String>();
+//				if (comb.size() > 1) {
+//					listOfSpecies = this.getTaxonNamesbyState(stateToTaxaMap, comb.get(0));
+//					for (int i=1;i<comb.size();i++) {
+//						List<String> tmpSpecies = new LinkedList<String>();
+//						tmpSpecies = this.getTaxonNamesbyState(stateToTaxaMap, comb.get(i));
+//						listOfSpecies.retainAll(tmpSpecies);
+//			        }
+//				} else {
+//					listOfSpecies = this.getTaxonNamesbyState(stateToTaxaMap, comb.get(0));
+//				}
+//				combSize = listOfSpecies.size();
+//				p = 1.0 / numberOfTaxa * combSize;
+//				if (p != 0) {
+//					tmp += p * logBase2(p);
+//				} else {
+//					tmp += 0;
+//				}
+//			}
+//			ig += Math.pow((-1), key) * tmp;
+//		}
 		
 		return ig;
 
