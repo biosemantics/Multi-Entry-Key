@@ -170,12 +170,13 @@ public class CharactersView extends VerticalLayoutContainer {
 	private ContentPanel createEntry(final CharacterGain characterGain, Set<String> stateValues, Set<CharacterStateValue> selectedCharacterStateValues) {
 		ContentPanel result = new ContentPanel(appearance);
 		String character = characterGain.getCharacter().trim();
-		if(character.isEmpty())
-			character = "unknown";
 		result.setHeadingText(character);
 	    VerticalLayoutContainer verticalLayoutContainer = new VerticalLayoutContainer();
 	    for (final String stateValue : stateValues) {
-			CheckBox checkBox = new CheckBox(stateValue);
+	    	String showValue = stateValue.trim();
+			if(showValue.isEmpty())
+				showValue = "unknown";
+			CheckBox checkBox = new CheckBox(showValue);
 			final CharacterStateValue characterStateValue = new CharacterStateValue(characterGain.getCharacter(), stateValue);
 			checkBox.setValue(selectedCharacterStateValues.contains(characterStateValue));
 			checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
