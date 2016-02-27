@@ -52,9 +52,9 @@ public class CharactersView extends VerticalLayoutContainer {
 	public CharactersView(EventBus eventBus) {
 		this.eventBus = eventBus;
 		
-		usefullPanel.setHeadingText("<b>Usefull Characters for Differentiation</b>");
-		selectedPanel.setHeadingText("<b>Selected Characters for Differentiation</b>");
-		uselessPanel.setHeadingText("<b>Useless Characters for Differentiation</b>");
+		usefullPanel.setHeadingText("<b>Usefull Characters for Differentiation (Sorted by character diagnosis values high to low)</b>");
+		selectedPanel.setHeadingText("<b>Selected Characters for Differentiation (Sorted by character diagnosis values high to low)</b>");
+		uselessPanel.setHeadingText("<b>Useless Characters for Differentiation (Sorted by character diagnosis values high to low)</b>");
 		categoriesContainer.add(usefullPanel);
 		categoriesContainer.add(selectedPanel);
 		categoriesContainer.add(uselessPanel);
@@ -168,8 +168,11 @@ public class CharactersView extends VerticalLayoutContainer {
 	}
 
 	private ContentPanel createEntry(final CharacterGain characterGain, Set<String> stateValues, Set<CharacterStateValue> selectedCharacterStateValues) {
-		ContentPanel result = new ContentPanel(appearance);		
-		result.setHeadingText(characterGain.toString());
+		ContentPanel result = new ContentPanel(appearance);
+		String character = characterGain.getCharacter().trim();
+		if(character.isEmpty())
+			character = "unknown";
+		result.setHeadingText(character);
 	    VerticalLayoutContainer verticalLayoutContainer = new VerticalLayoutContainer();
 	    for (final String stateValue : stateValues) {
 			CheckBox checkBox = new CheckBox(stateValue);
