@@ -1,5 +1,7 @@
 package edu.ucdavis.cs.cfgproject.client;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -168,11 +170,13 @@ public class CharactersView extends VerticalLayoutContainer {
 	}
 
 	private ContentPanel createEntry(final CharacterGain characterGain, Set<String> stateValues, Set<CharacterStateValue> selectedCharacterStateValues) {
+		List<String> sortedStateValues = new ArrayList<String>(stateValues);
+		Collections.sort(sortedStateValues);
 		ContentPanel result = new ContentPanel(appearance);
 		String character = characterGain.getCharacter().trim();
 		result.setHeadingText(character);
 	    VerticalLayoutContainer verticalLayoutContainer = new VerticalLayoutContainer();
-	    for (final String stateValue : stateValues) {
+	    for (final String stateValue : sortedStateValues) {
 	    	String showValue = stateValue.trim();
 			if(showValue.isEmpty())
 				showValue = "unknown";

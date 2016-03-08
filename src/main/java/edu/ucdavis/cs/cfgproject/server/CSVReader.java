@@ -51,8 +51,12 @@ public class CSVReader {
 	public Set<String> getSplitedValues(String multiValue) {
 		String[] values = multiValue.split(Pattern.quote(String.valueOf(valueSeparator)));
 		Set<String> result = new HashSet<String>();
-		for(String value : values)
-			result.add(value.trim().toLowerCase());
+		for(String value : values) {
+			value = value.trim().toLowerCase();
+			if(value.isEmpty())
+				value = "unknown";
+			result.add(value);
+		}
 		return result;
 	}
 }
