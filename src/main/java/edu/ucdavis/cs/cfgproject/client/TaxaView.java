@@ -15,6 +15,7 @@ import com.sencha.gxt.core.client.dom.ScrollSupport.ScrollMode;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.data.shared.Store.StoreSortInfo;
+import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
@@ -24,7 +25,7 @@ import edu.ucdavis.cs.cfgproject.shared.model.Taxon;
 import edu.ucdavis.cs.cfgproject.shared.model.TaxonMatrix;
 import edu.ucdavis.cs.cfgproject.shared.model.TaxonProperties;
 
-public class TaxaView extends VerticalLayoutContainer {
+public class TaxaView extends SimpleContainer {
 
 	private EventBus eventBus;
 	private TaxonProperties taxonProperites = GWT.create(TaxonProperties.class);
@@ -36,7 +37,6 @@ public class TaxaView extends VerticalLayoutContainer {
 	public TaxaView(EventBus eventBus) {
 		this.eventBus = eventBus;
 
-		setScrollMode(ScrollMode.AUTO);
 		add(createTaxaGrid());
 	}
 	
