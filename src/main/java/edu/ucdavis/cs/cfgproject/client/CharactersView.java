@@ -2,6 +2,7 @@ package edu.ucdavis.cs.cfgproject.client;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +37,7 @@ import edu.ucdavis.cs.cfgproject.client.event.SelectStateEvent;
 import edu.ucdavis.cs.cfgproject.shared.TaxonMatrixExtractor;
 import edu.ucdavis.cs.cfgproject.shared.model.CharacterGain;
 import edu.ucdavis.cs.cfgproject.shared.model.CharacterStateValue;
+import edu.ucdavis.cs.cfgproject.shared.model.StateValueCount;
 import edu.ucdavis.cs.cfgproject.shared.model.TaxonMatrix;
 
 public class CharactersView extends VerticalLayoutContainer {
@@ -124,8 +126,8 @@ public class CharactersView extends VerticalLayoutContainer {
 			selectedCharacters.add(characterStatevalue.getCharacter());
 		
 		for(CharacterGain characterGain : characterGains) {
-			Set<String> stateValues = TaxonMatrixExtractor.extractCharacterStateValues(taxonMatrix, characterGain.getCharacter());
-			ContentPanel widget = createEntry(characterGain, stateValues, selectedCharacterStateValues);
+			Set<StateValueCount> stateValuesCounts = TaxonMatrixExtractor.extractCharacterStateValues(taxonMatrix, characterGain.getCharacter());
+			ContentPanel widget = createEntry(characterGain, stateValuesCounts, selectedCharacterStateValues);
 			
 			if(selectedCharacters.contains(characterGain.getCharacter()))
 				selectedContainer.add(widget);
@@ -169,19 +171,21 @@ public class CharactersView extends VerticalLayoutContainer {
 		return categoriesContainer.getActiveWidget() != null && categoriesContainer.getActiveWidget().equals(selectedPanel);
 	}
 
-	private ContentPanel createEntry(final CharacterGain characterGain, Set<String> stateValues, Set<CharacterStateValue> selectedCharacterStateValues) {
-		List<String> sortedStateValues = new ArrayList<String>(stateValues);
-		Collections.sort(sortedStateValues);
+	private ContentPanel createEntry(final CharacterGain characterGain, Set<StateValueCount> stateValues, Set<CharacterStateValue> selectedCharacterStateValues) {
+		List<StateValueCount> sortedStateValues = new ArrayList<StateValueCount>(stateValues);
+		Collections.sort(sortedStateValues, new Comparator<StateValueCount>() {
+			@Override
+			public int compare(StateValueCount o1, StateValueCount o2) {
+				return o1.getValue().compareTo(o2.getValue());
+			}
+		});
 		ContentPanel result = new ContentPanel(appearance);
 		String character = characterGain.getCharacter().trim();
 		result.setHeadingText(character);
 	    VerticalLayoutContainer verticalLayoutContainer = new VerticalLayoutContainer();
-	    for (final String stateValue : sortedStateValues) {
-	    	String showValue = stateValue.trim();
-			if(showValue.isEmpty())
-				showValue = "unknown";
-			CheckBox checkBox = new CheckBox(showValue);
-			final CharacterStateValue characterStateValue = new CharacterStateValue(characterGain.getCharacter(), stateValue);
+	    for (final StateValueCount stateValue : sortedStateValues) {
+			CheckBox checkBox = new CheckBox(stateValue.getValue() + " (" + stateValue.getCount() + ")");
+			final CharacterStateValue characterStateValue = new CharacterStateValue(characterGain.getCharacter(), stateValue.getValue());
 			checkBox.setValue(selectedCharacterStateValues.contains(characterStateValue));
 			checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 				@Override
