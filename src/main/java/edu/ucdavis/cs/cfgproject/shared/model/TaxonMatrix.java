@@ -8,11 +8,13 @@ import java.util.Set;
 public class TaxonMatrix implements Serializable {
 
 	private Collection<Taxon> taxa = new HashSet<Taxon>();
+	private Collection<String> characters = new HashSet<String>();
 	
 	public TaxonMatrix() { }
 	
-	public TaxonMatrix(Collection<Taxon> taxa) {
+	public TaxonMatrix(Collection<Taxon> taxa, Collection<String> characters) {
 		this.taxa = taxa;
+		this.characters = characters;
 	}
 
 	public Collection<Taxon> getTaxa() {
@@ -27,10 +29,8 @@ public class TaxonMatrix implements Serializable {
 		return taxa.isEmpty();
 	}
 
-	public Set<String> getCharacters() {
-		if(isEmpty())
-			return new HashSet<String>();
-		return taxa.iterator().next().getCharacters();
+	public Collection<String> getCharacters() {
+		return characters;
 	}
 	
 }

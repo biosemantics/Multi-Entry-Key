@@ -35,7 +35,7 @@ public class KeyGenerationService extends RemoteServiceServlet implements IKeyGe
 
 	@Override
 	public List<CharacterGain> getCharacterGains(TaxonMatrix taxonMatrix) {
-		Set<String> characters = taxonMatrix.getCharacters();
+		Collection<String> characters = taxonMatrix.getCharacters();
 		List<CharacterGain> result = new ArrayList<CharacterGain>(characters.size());
 		for (String character : characters)
 			result.add(new CharacterGain(character, informationGainCalculator.calculateNDisc1Ig(taxonMatrix, character)));

@@ -52,9 +52,9 @@ public class CharactersView extends VerticalLayoutContainer {
 	public CharactersView(EventBus eventBus) {
 		this.eventBus = eventBus;
 		
-		usefullPanel.setHeadingText("<b>Usefull Characters for Differentiation (Sorted by character diagnosis values high to low)</b>");
-		selectedPanel.setHeadingText("<b>Selected Characters for Differentiation (Sorted by character diagnosis values high to low)</b>");
-		uselessPanel.setHeadingText("<b>Useless Characters for Differentiation (Sorted by character diagnosis values high to low)</b>");
+		usefullPanel.setHeadingText("<b>Informative Characters for Differentiation (Sorted by character diagnosis values high to low)</b>");
+		selectedPanel.setHeadingText("<b>Selected Characters for Differentiation</b>");
+		uselessPanel.setHeadingText("<b>Non-informative Characters for Differentiation</b>");
 		categoriesContainer.add(usefullPanel);
 		categoriesContainer.add(selectedPanel);
 		categoriesContainer.add(uselessPanel);

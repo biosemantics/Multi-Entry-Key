@@ -2,6 +2,7 @@ package edu.ucdavis.cs.cfgproject.server;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -40,11 +41,18 @@ public class CSVReader {
 		    		taxon.setState(head[i], new State(getSplitedValues(line[i])));
 		    	taxa.add(taxon);
 		    }
-		    return new TaxonMatrix(taxa);
+		    List<String> characters = new ArrayList<String>(Arrays.asList(head));
+		    characters.remove(0);
+		    characters.addAll(characters);
+		    return new TaxonMatrix(taxa, new HashSet<String>(characters));
 		}
 	}
 	
 	public Set<String> getSplitedValues(String multiValue) {
-		return new HashSet<String>(Arrays.asList(multiValue.split(Pattern.quote(String.valueOf(valueSeparator)))));
+		String[] values = multiValue.split(Pattern.quote(String.valueOf(valueSeparator)));
+		Set<String> result = new HashSet<String>();
+		for(String value : values)
+			result.add(value.trim().toLowerCase());
+		return result;
 	}
 }

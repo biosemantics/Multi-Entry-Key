@@ -37,7 +37,7 @@ public class TaxonMatrixExtractor {
 			for(CharacterStateValue characterStateValue : characterStateValues) 
 				if(!taxon.getState(characterStateValue.getCharacter()).contains(characterStateValue.getStateValue()))
 					taxa.remove(taxon);
-		return new TaxonMatrix(taxa);
+		return new TaxonMatrix(taxa, taxonMatrix.getCharacters());
 	}
 	
 	public static Map<String, Set<Taxon>> extractStateToTaxaMap(TaxonMatrix taxonMatrix, String character) {
