@@ -132,7 +132,7 @@ public class CharactersView extends VerticalLayoutContainer {
 			if(selectedCharacters.contains(characterGain.getCharacter()))
 				selectedContainer.add(widget);
 			else {
-				if(characterGain.getInformationGain() == 0.0)
+				if(characterGain.getInformationGain() <= 0.0)
 					uselessContainer.add(widget);
 				else 			
 					usefullContainer.add(widget);
