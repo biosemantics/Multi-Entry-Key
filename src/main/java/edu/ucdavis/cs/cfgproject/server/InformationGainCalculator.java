@@ -20,7 +20,7 @@ public class InformationGainCalculator {
 	
 	public double calculateNDisc1Ig(TaxonMatrix taxonMatrix, String character) {
 		Map<String, Set<Taxon>> stateToTaxaMap = TaxonMatrixExtractor.extractStateToTaxaMap(taxonMatrix, character);
-		Map<State, Set<Taxon>> stateObjToTaxaMap = TaxonMatrixExtractor.extractStateObjToTaxaMap(taxonMatrix, character);
+		Map<Set<String>, Set<Taxon>> stateObjToTaxaMap = TaxonMatrixExtractor.extractStateObjToTaxaMap(taxonMatrix, character);
 //		HashMap<Integer, List<List<String>>> dict = new HashMap<Integer, List<List<String>>>();
 //		dict = this.genDict(stateToTaxaMap);
 		double tmp = 0.0;
@@ -30,8 +30,18 @@ public class InformationGainCalculator {
 		int numberOfTaxa = taxonMatrix.size();
 		
 		// test
-//		for (Map.Entry<State, Set<Taxon>> entry : stateObjToTaxaMap.entrySet()) {
-//			System.out.println(entry.getKey().getValues());
+//		System.out.println("size="+ stateToTaxaMap.size());
+//		for (Map.Entry<String, Set<Taxon>> entry : stateToTaxaMap.entrySet()) {
+//			System.out.println("key="+entry.getKey());
+//			Set<Taxon> tmptaxa = new HashSet<Taxon>();
+//			tmptaxa = entry.getValue();
+//			for (Taxon taxon : tmptaxa) {
+//				System.out.println(taxon.getName());
+//			}
+//		}
+//		System.out.println("size="+ stateObjToTaxaMap.size());
+//		for (Map.Entry<Set<String>, Set<Taxon>> entry : stateObjToTaxaMap.entrySet()) {
+//			System.out.println(entry.getKey());
 //			Set<Taxon> tmptaxa = new HashSet<Taxon>();
 //			tmptaxa = entry.getValue();
 //			for (Taxon taxon : tmptaxa) {
@@ -60,8 +70,8 @@ public class InformationGainCalculator {
 		ig += (-1) * tmp;
 		
 		// state size > 1
-		for (Map.Entry<State, Set<Taxon>> entry : stateObjToTaxaMap.entrySet()) {
-			int stateSize = entry.getKey().getValues().size();
+		for (Map.Entry<Set<String>, Set<Taxon>> entry : stateObjToTaxaMap.entrySet()) {
+			int stateSize = entry.getKey().size();
 			int speciesSize = entry.getValue().size();
 			p = 1.0 / numberOfTaxa * speciesSize;
 			if (p != 0) {
@@ -100,7 +110,7 @@ public class InformationGainCalculator {
 //			}
 //			ig += Math.pow((-1), key) * tmp;
 //		}
-		
+		System.out.println("IG is " + ig);
 		return ig;
 
 	}
