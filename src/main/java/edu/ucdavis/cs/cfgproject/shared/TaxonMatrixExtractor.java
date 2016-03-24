@@ -9,25 +9,36 @@ import java.util.Set;
 
 import edu.ucdavis.cs.cfgproject.shared.model.CharacterStateValue;
 import edu.ucdavis.cs.cfgproject.shared.model.State;
+import edu.ucdavis.cs.cfgproject.shared.model.StateValueCount;
 import edu.ucdavis.cs.cfgproject.shared.model.Taxon;
 import edu.ucdavis.cs.cfgproject.shared.model.TaxonMatrix;
 
 public class TaxonMatrixExtractor {
 	
-	public static Map<String, Set<String>> extractCharacterToStateValuesMap(TaxonMatrix taxonMatrix) {
-		Map<String, Set<String>> result = new HashMap<String, Set<String>>();
+	public static Map<String, Set<StateValueCount>> extractCharacterToStateValuesMap(TaxonMatrix taxonMatrix) {
+		Map<String, Set<StateValueCount>> result = new HashMap<String, Set<StateValueCount>>();
 		for(String character : taxonMatrix.getCharacters()) {
+			
 			result.put(character, extractCharacterStateValues(taxonMatrix, character));
 		}
 		return result;
 	}
 	
-	public static Set<String> extractCharacterStateValues(TaxonMatrix taxonMatrix, String character) {
-		Set<String> result = new HashSet<String>();
+	public static Set<StateValueCount> extractCharacterStateValues(TaxonMatrix taxonMatrix, String character) {
+		Set<StateValueCount> result = new HashSet<StateValueCount>();
+		Map<String, Integer> valueCount = new HashMap<String, Integer>();
 		for(Taxon taxon : taxonMatrix.getTaxa()) {
 			State state = taxon.getState(character);
-			result.addAll(state.getValues());
+			
+			for(String value : state.getValues()) {
+				if(!valueCount.containsKey(value))
+					valueCount.put(value, 0);
+				valueCount.put(value, valueCount.get(value) + 1);
+			}
 		}
+		
+		for(String value : valueCount.keySet())
+			result.add(new StateValueCount(value, valueCount.get(value)));
 		return result;
 	}
 	
@@ -37,7 +48,7 @@ public class TaxonMatrixExtractor {
 			for(CharacterStateValue characterStateValue : characterStateValues) 
 				if(!taxon.getState(characterStateValue.getCharacter()).contains(characterStateValue.getStateValue()))
 					taxa.remove(taxon);
-		return new TaxonMatrix(taxa);
+		return new TaxonMatrix(taxa, taxonMatrix.getCharacters());
 	}
 	
 	public static Map<String, Set<Taxon>> extractStateToTaxaMap(TaxonMatrix taxonMatrix, String character) {

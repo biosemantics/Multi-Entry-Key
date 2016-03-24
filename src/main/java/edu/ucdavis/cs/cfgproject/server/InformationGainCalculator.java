@@ -30,18 +30,8 @@ public class InformationGainCalculator {
 		int numberOfTaxa = taxonMatrix.size();
 		
 		// test
-//		System.out.println("size="+ stateToTaxaMap.size());
-//		for (Map.Entry<String, Set<Taxon>> entry : stateToTaxaMap.entrySet()) {
-//			System.out.println("key="+entry.getKey());
-//			Set<Taxon> tmptaxa = new HashSet<Taxon>();
-//			tmptaxa = entry.getValue();
-//			for (Taxon taxon : tmptaxa) {
-//				System.out.println(taxon.getName());
-//			}
-//		}
-//		System.out.println("size="+ stateObjToTaxaMap.size());
-//		for (Map.Entry<Set<String>, Set<Taxon>> entry : stateObjToTaxaMap.entrySet()) {
-//			System.out.println(entry.getKey());
+//		for (Map.Entry<State, Set<Taxon>> entry : stateObjToTaxaMap.entrySet()) {
+//			System.out.println(entry.getKey().getValues());
 //			Set<Taxon> tmptaxa = new HashSet<Taxon>();
 //			tmptaxa = entry.getValue();
 //			for (Taxon taxon : tmptaxa) {
@@ -110,7 +100,7 @@ public class InformationGainCalculator {
 //			}
 //			ig += Math.pow((-1), key) * tmp;
 //		}
-		System.out.println("IG is " + ig);
+		
 		return ig;
 
 	}
