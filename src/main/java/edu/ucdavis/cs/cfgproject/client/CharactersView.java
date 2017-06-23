@@ -12,6 +12,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -56,9 +57,9 @@ public class CharactersView extends VerticalLayoutContainer {
 	public CharactersView(EventBus eventBus) {
 		this.eventBus = eventBus;
 		
-		usefullPanel.setHeadingText("<b>Informative Characters for Differentiation (Sorted by character diagnosis values high to low)</b>");
-		selectedPanel.setHeadingText("<b>Selected Characters for Differentiation</b>");
-		uselessPanel.setHeadingText("<b>Non-informative Characters for Differentiation</b>");
+		usefullPanel.setHeading(SafeHtmlUtils.fromString("<b>Informative Characters for Differentiation (Sorted by character diagnosis values high to low)</b>"));
+		selectedPanel.setHeading(SafeHtmlUtils.fromString("<b>Selected Characters for Differentiation</b>"));
+		uselessPanel.setHeading(SafeHtmlUtils.fromString("<b>Non-informative Characters for Differentiation</b>"));
 		categoriesContainer.add(usefullPanel);
 		categoriesContainer.add(selectedPanel);
 		categoriesContainer.add(uselessPanel);
@@ -181,7 +182,7 @@ public class CharactersView extends VerticalLayoutContainer {
 		});
 		ContentPanel result = new ContentPanel(appearance);
 		String character = characterGain.getCharacter().trim();
-		result.setHeadingText(character);
+		result.setHeading(character);
 	    VerticalLayoutContainer verticalLayoutContainer = new VerticalLayoutContainer();
 	    for (final StateValueCount stateValue : sortedStateValues) {
 			CheckBox checkBox = new CheckBox(stateValue.getValue() + " (" + stateValue.getCount() + ")");
